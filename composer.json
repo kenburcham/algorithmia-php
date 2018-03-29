@@ -1,0 +1,21 @@
+{
+    "name": "root/algorithmia-php",
+    "description": "PHP Client for Algorithmia.com",
+    "authors": [
+        {
+            "name": "Ken Burcham",
+            "email": "kenburcham@gmail.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^6.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6"
+    },
+    "autoload": {
+        "psr-0": {
+            "Algorithmia": "src/"
+        }
+    }
+}
