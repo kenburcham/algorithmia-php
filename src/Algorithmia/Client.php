@@ -48,9 +48,13 @@ class Client {
     /**
      * Construct the Algorithmia client
      * @param string $in_key 
+     * @param string $in_baseurl URL for the server: "https://api.algorithmia.com/v1/algo/"
      */
-    public function __construct($in_key) {
+    public function __construct($in_key, $in_baseurl=null) {
         $this->key = preg_replace('/\n/','',$in_key);
+        if(!is_null($in_baseurl)) {
+            $this->options['server'] = $in_baseurl;
+        }
     }
 
     /**
