@@ -22,25 +22,12 @@ class AlgoResponse {
         return $this->httpResponse;
     }
 
-    public function getResult(){
+    public function get(){
         return $this->result;
     }
 
     public function getMetadata(){
         return $this->metadata;
     }
-
-    public function setHttpResponse($in_httpResponse){
-        $this->httpResponse = $in_httpResponse;
-    }
-
-    public function setResult($in_result){
-        $this->result = $in_result;
-    }
-
-    public function setMetadata($in_metadata){
-        $this->metadata = $in_metadata;
-    }
-
 
 }
