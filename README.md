@@ -11,3 +11,8 @@ Json
 
 Binary
         $bin_input = new Algorithmia\ByteArray(file_get_contents($bin_file));
+
+timeout
+
+$client->setOptions(['timeout' => 60]); or
+$client->setOptions(['timeout' => 60])->pipe($input);

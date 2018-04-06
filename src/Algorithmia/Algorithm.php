@@ -39,6 +39,17 @@ class Algorithm {
         return $this->client->doSynchronousCall($this->algoUrl, $in_input);
     }
 
+    /**
+     * Set options on the client such as timeout
+     * @param array $in_options An array of options: ['timeout' => 120]
+     * @return Algorithmia\Algorithm $this
+     */
+    public function setOptions(array $in_options = array()) 
+    {
+        $this->client->setOptions($in_options);
+        return $this;
+    }
+
 
 
 }

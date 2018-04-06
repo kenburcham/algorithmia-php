@@ -16,8 +16,6 @@ class Client {
     const CONTENT_TYPE_TEXT = "application/text";
     const CONTENT_TYPE_OCTET_STREAM = "application/octet-stream";
 
-    const DEFAULT_CONTENT_TYPE = self::CONTENT_TYPE_JSON;
-
     /**
      * Algorithmia API key
      * @var string $key
@@ -36,6 +34,16 @@ class Client {
      */
     private $bin_http;
     
+    /**
+     * Options that can be configured for the client
+     * @var array
+     */
+    private $options = array(
+        'timeout' => 90,
+        'server' => self::API_BASE_PATH,
+        'agent' => self::USER_AGENT_SUFFIX,
+        'version' => self::LIBVER
+    );
 
     /**
      * Construct the Algorithmia client
@@ -55,6 +63,25 @@ class Client {
     }
 
     /**
+     * Set options for the Algo Client
+     * @param array Array of parameters:  ['timeout' => 120, 'server' => 'https://api.algorithmia.com/v2/algo/']
+     * @return Algorithmia\Client
+     */
+    public function setOptions(array $in_options = array()) {
+        $this->options = array_merge($this->options, $in_options);
+
+        //setting the options needs to drop the cached guzzle clients so they will be recreated
+        $this->json_http = null;
+        $this->bin_http = null;
+
+        return $this;
+    }
+
+    public function getOptions() {
+        return $this->options;
+    }
+
+    /**
      * Get an Algorithmia\Algorithm that represents the algorithm to call.
      * @param string $in_algo The algorithm to call.
      * @return Algorithmia\Algorithm
@@ -67,10 +94,12 @@ class Client {
      * Do the synchronous call and return the result.
      * @param string $in_algo The algorithm to call.
      * @param mixed $in_input The input to send to the algorithm. Can be a string or an object.
+     * @return Algorithmia\AlgoResponse the AlgoResponse object for the result
      */
     public function doSynchronousCall(string $in_algo, $in_input) {
         $response = null;
 
+        //call either json or binary depending on the input
         if (is_object($in_input) && get_class($in_input) == ByteArray::class) {
             $response = $this->doSynchronousBinaryCall($in_algo, $in_input->getData());
         } 
@@ -78,45 +107,17 @@ class Client {
             $response = $this->doSynchronousJsonCall($in_algo, $in_input);
         }
 
-        return $response;
-    }
-
-    private function getCallUrl($in_target) {
-        return self::API_BASE_PATH . '/'. ltrim($in_target,'/');
-    }
-
-    /**
-     * @param $in_url string of URL to call
-     * @param $in_payload mixed payload to deliver to algorithm. Can be a string or an object.
-     * @return Algorithmia\AlgoResponse
-     */
-    private function doSynchronousJsonCall(string $in_url, $in_payload = "") {
-        $http_client = $this->getJsonHttpClient();
-
-        $response = $http_client->post($in_url, ['json'=>$in_payload]);
-
         $str_result = $response->getBody()->getContents();
         $obj_result = json_decode($str_result);
-        
-        $algo_response = new AlgoResponse($response, $obj_result);
 
-        return $algo_response;
-    }
+        if(property_exists($obj_result, 'error'))
+        {
+            throw new AlgoException($obj_result->error->message);
+        }
 
-    /**
-     * @param $in_url string of URL to call
-     * @param $in_payload mixed payload to deliver to algorithm. Can be a string or an object.
-     * @return Algorithmia\AlgoResponse
-     */
-    private function doSynchronousBinaryCall(string $in_url, $in_payload = "") {
-        $http_client = $this->getBinaryHttpClient();
+        //var_dump($obj_result);
 
-        $response = $http_client->post($in_url, ['body'=>$in_payload]);
-
-        $str_result = $response->getBody()->getContents();
-
-        $obj_result = json_decode($str_result);
-        
+        //convert results if they are binary
         if($obj_result->metadata->content_type == "binary" && $obj_result->result)
         {
             $obj_result->result = base64_decode($obj_result->result);
@@ -129,6 +130,32 @@ class Client {
         $algo_response = new AlgoResponse($response, $obj_result);
 
         return $algo_response;
+    }
+
+    /**
+     * @param $in_url string of URL to call
+     * @param $in_payload mixed payload to deliver to algorithm. Can be a string or an object.
+     * @return httpresponse Object
+     */
+    private function doSynchronousJsonCall(string $in_url, $in_payload = "") {
+        $http_client = $this->getJsonHttpClient();
+
+        $response = $http_client->post($in_url, ['json' => $in_payload, 'timeout' => $this->options['timeout']]);
+
+        return $response;
+    }
+
+    /**
+     * @param $in_url string of URL to call
+     * @param $in_payload mixed payload to deliver to algorithm. Can be a string or an object.
+     * @return httpresponse object
+     */
+    private function doSynchronousBinaryCall(string $in_url, $in_payload = "") {
+        $http_client = $this->getBinaryHttpClient();
+
+        $response = $http_client->post($in_url, ['body' => $in_payload, 'timeout' => $this->options['timeout']]);
+
+        return $response;
     }
 
     public function getBinaryHttpClient()
@@ -151,25 +178,25 @@ class Client {
 
     private function createJsonHttpClient()
     {
-        return new \GuzzleHttp\Client($this->getGuzzleHttpOptions('application/json'));
+        return new \GuzzleHttp\Client($this->getGuzzleHttpOptions(self::CONTENT_TYPE_JSON));
     }
 
     private function createBinaryHttpClient()
     {
-        return new \GuzzleHttp\Client($this->getGuzzleHttpOptions('application/octet-stream'));
+        return new \GuzzleHttp\Client($this->getGuzzleHttpOptions(self::CONTENT_TYPE_OCTET_STREAM));
     }
 
     private function getGuzzleHttpOptions($in_content_type){
-        $options = [
-            'base_uri' => self::API_BASE_PATH,
+        $header_options = [
+            'base_uri' => $this->options['server'],
             'headers' => ['Content-Type' => $in_content_type]
         ];
 
         if(isset($this->key)){
-            $options['headers']['Authorization'] = 'Simple '.$this->key;
+            $header_options['headers']['Authorization'] = 'Simple '.$this->key;
         }
 
-        return $options;
+        return $header_options;
     }
 
 
