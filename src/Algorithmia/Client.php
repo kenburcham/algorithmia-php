@@ -71,14 +71,18 @@ class Client {
     }
 
     /**
+     * @param $in_url string of URL to call
+     * @param $in_payload mixed payload to deliver to algorithm. Can be a json string or an object.
      * @return Algorithmia\AlgoResponse
      */
-    private function doSynchronousPostCall(string $in_url, $in_payload) {
+    private function doSynchronousPostCall(string $in_url, $in_payload = "") {
         $http_client = $this->getHttpClient();
-
         $response = $http_client->post($in_url, ['json'=>$in_payload]);
 
-        $algo_response = new AlgoResponse($response, $response->getBody()->getContents(), $response->getBody());
+        $str_result = $response->getBody()->getContents();
+        $obj_result = json_decode($str_result);
+        
+        $algo_response = new AlgoResponse($response, $obj_result);
 
         return $algo_response;
     }
@@ -100,8 +104,8 @@ class Client {
     private function getDefaultGuzzleHttpOptions(){
         $options = [
             'base_uri' => self::API_BASE_PATH,
-            'headers' => ['Content-Type' => 'application/json'
-        ]];
+            'headers' => ['Content-Type' => 'application/json']
+        ];
 
         if(isset($this->key)){
             $options['headers']['Authorization'] = 'Simple '.$this->key;

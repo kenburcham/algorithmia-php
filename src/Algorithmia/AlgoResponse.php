@@ -8,13 +8,14 @@ class AlgoResponse {
     public $result;
     public $metadata;
 
+    /**
+     * @param $in_httpResponse HttpResponse object
+     * @param $in_result Object result object from algorithm call
+     */
     public function __construct($in_httpResponse, $in_result) {
         $this->httpResponse = $in_httpResponse;
-        
-        $json_result = json_decode($in_result);
-        
-        $this->result = $json_result->result;
-        $this->metadata = $json_result->metadata;
+        $this->result = $in_result->result;
+        $this->metadata = $in_result->metadata;
     }
 
     public function getHttpResponse(){
