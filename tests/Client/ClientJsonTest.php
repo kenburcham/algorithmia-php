@@ -17,5 +17,10 @@ final class ClientJsonTest extends BaseTest
         $response = $algo->pipe($json_to_test);
 
         $this->assertEquals(json_encode($response->result), "[\"transformer\",\"retransform\"]");
+
+        //and we expect the fluent way to work, too
+        $anagrams = $algo->pipe(["transformer", "terraforms", "retransform"])->result;
+
+        $this->assertEquals("retransform",$anagrams[1]);
     }
 }

@@ -59,7 +59,7 @@ class Client {
     /**
      * Do the synchronous call and return the result.
      * @param string $in_algo The algorithm to call.
-     * @param mixed $in_input The input to send to the algorithm.
+     * @param mixed $in_input The input to send to the algorithm. Can be a string or an object.
      */
     public function doSynchronousCall(string $in_algo, $in_input) {
         //$url_target = $this->getCallUrl($in_algo);
@@ -72,7 +72,7 @@ class Client {
 
     /**
      * @param $in_url string of URL to call
-     * @param $in_payload mixed payload to deliver to algorithm. Can be a json string or an object.
+     * @param $in_payload mixed payload to deliver to algorithm. Can be a string or an object.
      * @return Algorithmia\AlgoResponse
      */
     private function doSynchronousPostCall(string $in_url, $in_payload = "") {
