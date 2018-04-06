@@ -4,3 +4,10 @@ Running the tests will connect to the Algorithmia server and execute a variety o
 
 You can run the tests by executing:
 `./vendor/bin/phpunit -v tests`
+
+Text
+
+Json
+
+Binary
+        $bin_input = new Algorithmia\ByteArray(file_get_contents($bin_file));

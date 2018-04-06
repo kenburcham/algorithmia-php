@@ -25,11 +25,18 @@ class Client {
     private $key;
 
     /**
-     * Guzzle http client
+     * Guzzle http client configured with json headers
      * @var GuzzleHttp\ClientInterface $http
      */
-    private $http;
+    private $json_http;
     
+    /**
+     * Guzzle http client configured with binary headers
+     * @var GuzzleHttp\ClientInterface $http
+     */
+    private $bin_http;
+    
+
     /**
      * Construct the Algorithmia client
      * @param string $in_key 
@@ -62,8 +69,16 @@ class Client {
      * @param mixed $in_input The input to send to the algorithm. Can be a string or an object.
      */
     public function doSynchronousCall(string $in_algo, $in_input) {
-        //$url_target = $this->getCallUrl($in_algo);
-        return $this->doSynchronousPostCall($in_algo, $in_input);
+        $response = null;
+
+        if (is_object($in_input) && get_class($in_input) == ByteArray::class) {
+            $response = $this->doSynchronousBinaryCall($in_algo, $in_input->getData());
+        } 
+        else {
+            $response = $this->doSynchronousJsonCall($in_algo, $in_input);
+        }
+
+        return $response;
     }
 
     private function getCallUrl($in_target) {
@@ -75,8 +90,9 @@ class Client {
      * @param $in_payload mixed payload to deliver to algorithm. Can be a string or an object.
      * @return Algorithmia\AlgoResponse
      */
-    private function doSynchronousPostCall(string $in_url, $in_payload = "") {
-        $http_client = $this->getHttpClient();
+    private function doSynchronousJsonCall(string $in_url, $in_payload = "") {
+        $http_client = $this->getJsonHttpClient();
+
         $response = $http_client->post($in_url, ['json'=>$in_payload]);
 
         $str_result = $response->getBody()->getContents();
@@ -87,24 +103,66 @@ class Client {
         return $algo_response;
     }
 
-    public function getHttpClient()
-    {
-        if(null === $this->http) {
-            $this->http = $this->createDefaultHttpClient();
+    /**
+     * @param $in_url string of URL to call
+     * @param $in_payload mixed payload to deliver to algorithm. Can be a string or an object.
+     * @return Algorithmia\AlgoResponse
+     */
+    private function doSynchronousBinaryCall(string $in_url, $in_payload = "") {
+        $http_client = $this->getBinaryHttpClient();
+
+        $response = $http_client->post($in_url, ['body'=>$in_payload]);
+
+        $str_result = $response->getBody()->getContents();
+
+        $obj_result = json_decode($str_result);
+        
+        if($obj_result->metadata->content_type == "binary" && $obj_result->result)
+        {
+            $obj_result->result = base64_decode($obj_result->result);
+
+            if ($obj_result->result === false) {
+                throw new \Exception('base64_decode failed');
+            }
         }
 
-        return $this->http;
+        $algo_response = new AlgoResponse($response, $obj_result);
+
+        return $algo_response;
     }
 
-    private function createDefaultHttpClient()
+    public function getBinaryHttpClient()
     {
-        return new \GuzzleHttp\Client($this->getDefaultGuzzleHttpOptions());
+        if(null === $this->bin_http) {
+            $this->bin_http = $this->createBinaryHttpClient();
+        }
+
+        return $this->bin_http;
     }
 
-    private function getDefaultGuzzleHttpOptions(){
+    public function getJsonHttpClient()
+    {
+        if(null === $this->json_http) {
+            $this->json_http = $this->createJsonHttpClient();
+        }
+
+        return $this->json_http;
+    }
+
+    private function createJsonHttpClient()
+    {
+        return new \GuzzleHttp\Client($this->getGuzzleHttpOptions('application/json'));
+    }
+
+    private function createBinaryHttpClient()
+    {
+        return new \GuzzleHttp\Client($this->getGuzzleHttpOptions('application/octet-stream'));
+    }
+
+    private function getGuzzleHttpOptions($in_content_type){
         $options = [
             'base_uri' => self::API_BASE_PATH,
-            'headers' => ['Content-Type' => 'application/json']
+            'headers' => ['Content-Type' => $in_content_type]
         ];
 
         if(isset($this->key)){
