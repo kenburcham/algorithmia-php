@@ -5,7 +5,7 @@ PHP client library for accessing the Algorithmia API
 For API documentation, see the [PHPDocs](https://algorithmia.com/docs/lang/PHP)
 
 ## Installation
-Packing is coming soon, but for now you can clone this repository and copy the Algorithmia folder into your project and point to it with your autoloader or add use statements directly.
+Packaging is coming soon, but for now you can clone this repository and copy the Algorithmia folder into your project and point to it with your autoloader or add "use Algorithmia;" statements directly. You'll also need to run "composer update" to get the packages the client needs.
 
 ## Authentication
 First, create an Algorithmia client and authenticate with your API key:
@@ -33,11 +33,11 @@ Call an algorithm with text input by simply passing a string into its `pipe` met
 If the algorithm output is text, then the `result` field of the response will be a string.
 
 ```PHP
-$algo = $client.algo('demo/Hello/0.1.1')
-$response = $algo->pipe("HAL 9000")
-echo $response->result    # Hello HAL 9000
-echo $response->metadata->content_type  # text
-echo $response->metadata->duration # 0.0002127
+$algo = $client->algo('demo/Hello/0.1.1');
+$response = $algo->pipe("HAL 9000");
+echo $response->result;    # Hello HAL 9000
+echo $response->metadata->content_type;  # text
+echo $response->metadata->duration; # 0.0002127
 ```
 
 ### JSON input/output
@@ -73,7 +73,7 @@ API errors and Algorithm exceptions will result in throwing an `AlgoException`:
 
 ```PHP
 $client->algo('util/whoopsWrongAlgo')->pipe('Hello, world!')  
-# Algorithmia.algo_response.AlgoException: algorithm algo://util/whoopsWrongAlgo not found
+# Algorithmia\AlgoException: algorithm algo://util/whoopsWrongAlgo not found
 ```
 
 ### Request options
