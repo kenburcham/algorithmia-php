@@ -95,6 +95,15 @@ class Client {
     }
 
     /**
+     * Get an Algorithmia\DataDirectory that represents a directory.
+     * @param string $in_dataurl The data directory url, e.g.: data://.my/folder
+     * @return Algorithmia\DataDirectory
+     */
+    public function dir(string $in_dataurl) {
+        return new DataDirectory($in_dataurl);
+    }
+
+    /**
      * Do the synchronous call and return the result.
      * @param string $in_algo The algorithm to call.
      * @param mixed $in_input The input to send to the algorithm. Can be a string or an object.
@@ -127,7 +136,7 @@ class Client {
             $obj_result->result = base64_decode($obj_result->result);
 
             if ($obj_result->result === false) {
-                throw new \Exception('base64_decode failed');
+                throw new \Exception('base64_decode failed to decode the result');
             }
         }
 
