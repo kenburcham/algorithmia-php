@@ -6,8 +6,6 @@ final class ClientDataDirectoryTest extends BaseTest
 {
     //basic text algorithms
     const EXISTING_DIR = "data://.my/foo";
-    const ALGORITHM_HELLO = "demo/Hello/0.1.0";
-    const ALGORITHM_SUMMARIZER = "nlp/Summarizer/0.1.7";
 
     /*
     public function testListDirectoryContents()
@@ -40,5 +38,13 @@ final class ClientDataDirectoryTest extends BaseTest
         $this->assertEquals("foo",$dir->getName());
         $this->assertEquals(".my/foo",$dir->getPath());
         $this->assertEquals("data",$dir->getConnector());
+    }
+
+    public function testTwoLevelDirectory(){
+        $dir = new Algorithmia\DataDirectory("s3://.my/foo/morefoo");
+
+        $this->assertEquals("morefoo",$dir->getName());
+        $this->assertEquals(".my/foo/morefoo",$dir->getPath());
+        $this->assertEquals("s3",$dir->getConnector());
     }
 }
