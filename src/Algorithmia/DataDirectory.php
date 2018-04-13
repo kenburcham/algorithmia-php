@@ -18,6 +18,8 @@ class DataDirectory {
 
     private $response;
 
+    const DATA_API_VERSION = "/v1/";
+
     public function __construct(string $in_dataurl, Client $in_client = null){
         $this->client = $in_client;
         $this->dataUrl = rtrim($in_dataurl,"/");
@@ -33,6 +35,19 @@ class DataDirectory {
         if(!DataConnectors::isValidConnector($this->connector)){
             throw new AlgoException("connection type is invalid: "+ $this->connector);
         }
+    }
+
+    /**
+     * Builds the data url from the server + "/v1/" + connector e.g.: "https://api.algorithmia.com/v1/data"
+     * @return string data api url
+     */
+    public function getDataAPIUrl(){
+        if(!isset($this->client)){
+            throw new AlgoException("client must be set");
+        }
+
+        preg_match('/^(?P<domain>https?:\/\/[^\/]*)/',$this->client->getOptions()['server'],$url_parts);
+        return $url_parts['domain'] . self::DATA_API_VERSION . $this->connector . "/";
     }
 
     public function getConnector(){
@@ -56,6 +71,7 @@ class DataDirectory {
     }
 
     public function files(){
+
         return $this->files;
     }
 

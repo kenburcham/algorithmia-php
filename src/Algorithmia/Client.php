@@ -52,8 +52,10 @@ class Client {
      */
     public function __construct($in_key, $in_baseurl=null) {
         $this->key = preg_replace('/\n/','',$in_key);
+
+        //make sure there is a trailing slash
         if(!is_null($in_baseurl)) {
-            $this->options['server'] = $in_baseurl;
+            $this->options['server'] = rtrim($in_baseurl,"/")."/";
         }
     }
 

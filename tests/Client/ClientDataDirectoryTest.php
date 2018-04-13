@@ -7,16 +7,13 @@ final class ClientDataDirectoryTest extends BaseTest
     //basic text algorithms
     const EXISTING_DIR = "data://.my/foo";
 
-    /*
+    
     public function testListDirectoryContents()
     {
-        $client = $this->getClient();
-        
-        $foo_dir = $client->dir(EXISTING_DIR); //must already exist and have only one file.
-
+        $client = $this->getClient();    
+        $foo_dir = $client->dir(self::EXISTING_DIR); //must already exist and have only one file.
         $this->assertCount(1,$foo_dir->files());
     }
-    */
 
 
     public function testConstructor(){
@@ -47,4 +44,25 @@ final class ClientDataDirectoryTest extends BaseTest
         $this->assertEquals(".my/foo/morefoo",$dir->getPath());
         $this->assertEquals("s3",$dir->getConnector());
     }
+
+    public function testGetDataAPIUrl(){
+        $client = $this->getClient();
+        $dir = new Algorithmia\DataDirectory("s3://.my/foo", $client); //sending in the client now
+        $this->assertEquals("https://api.algorithmia.com/v1/s3/", $dir->getDataAPIUrl());
+    }
+
+    public function testGetDataAPIUrlAfterSetServer(){
+        $client = $this->getClient();
+        $client->setOptions(['server' => 'https://api2.algorithmia.com/v1/algo/']);
+        $dir = new Algorithmia\DataDirectory("data://.my/foo", $client); 
+        $this->assertEquals("https://api2.algorithmia.com/v1/data/", $dir->getDataAPIUrl());
+    }
+
+    public function testMustSetClient(){
+        $dir = new Algorithmia\DataDirectory("s3://.my/foo"); //not setting client
+
+        $this->expectException(\Algorithmia\AlgoException::class);
+        $my_url = $dir->getDataAPIUrl(); //will raise exception because client not set
+    }
+
 }
