@@ -15,6 +15,13 @@ final class ClientDataDirectoryTest extends BaseTest
         $this->assertCount(1,$foo_dir->files());
     }
 
+    public function testListDirectories()
+    {
+        $client = $this->getClient();
+        $dirs = $client->dir('data://.my');
+        $this->assertCount(2, $dirs->folders());
+    }
+
     public function testListDirectoryRequiresClient()
     {
         $dir = new Algorithmia\DataDirectory("data://.my/foo");

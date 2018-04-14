@@ -55,7 +55,14 @@ class DataDirectory {
             $this->folders = $response->folders;
         }
 
+        //var_dump($response);
 
+
+    }
+
+    public function create(string $in_name, $in_acl)
+    {
+        
     }
 
     public function getConnector(){
@@ -75,6 +82,7 @@ class DataDirectory {
     }
 
     public function folders(){
+        $this->sync();
         return $this->folders;
     }
 
