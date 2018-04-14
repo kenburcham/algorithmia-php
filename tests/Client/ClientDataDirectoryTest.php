@@ -45,24 +45,17 @@ final class ClientDataDirectoryTest extends BaseTest
         $this->assertEquals("s3",$dir->getConnector());
     }
 
-    public function testGetDataAPIUrl(){
+    public function testGetDataUrl(){
         $client = $this->getClient();
         $dir = new Algorithmia\DataDirectory("s3://.my/foo", $client); //sending in the client now
-        $this->assertEquals("https://api.algorithmia.com/v1/s3/", $dir->getDataAPIUrl());
+        $this->assertEquals("https://api.algorithmia.com/v1/s3/", $client->getDataUrl($dir->getConnector()));
     }
 
     public function testGetDataAPIUrlAfterSetServer(){
         $client = $this->getClient();
-        $client->setOptions(['server' => 'https://api2.algorithmia.com/v1/algo/']);
+        $client->setOptions(['server' => 'https://api2.algorithmia.com']);
         $dir = new Algorithmia\DataDirectory("data://.my/foo", $client); 
-        $this->assertEquals("https://api2.algorithmia.com/v1/data/", $dir->getDataAPIUrl());
-    }
-
-    public function testMustSetClient(){
-        $dir = new Algorithmia\DataDirectory("s3://.my/foo"); //not setting client
-
-        $this->expectException(\Algorithmia\AlgoException::class);
-        $my_url = $dir->getDataAPIUrl(); //will raise exception because client not set
+        $this->assertEquals("https://api2.algorithmia.com/v1/data/", $client->getDataUrl($dir->getConnector()));
     }
 
 }

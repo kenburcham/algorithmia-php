@@ -9,12 +9,11 @@ namespace Algorithmia;
 
 class Client {
     const LIBVER = "1.0";
-    const USER_AGENT_SUFFIX = "algorithmia-php-client";
-    const API_BASE_PATH = "https://api.algorithmia.com/v1/algo/";
 
-    const CONTENT_TYPE_JSON = 'application/json';
-    const CONTENT_TYPE_TEXT = "application/text";
-    const CONTENT_TYPE_OCTET_STREAM = "application/octet-stream";
+    //defaults
+    const API_BASE_PATH = "https://api.algorithmia.com";
+    const API_VERSION = "/v1/";
+    const ALGO_SUFFIX = "algo/";
 
     /**
      * Algorithmia API key
@@ -23,40 +22,25 @@ class Client {
     private $key;
 
     /**
-     * Guzzle http client configured with json headers
-     * @var GuzzleHttp\ClientInterface $http
+     * http client that manages our http calls
+     * @var Algorithmia\HttpClient $http
      */
-    private $json_http;
-    
-    /**
-     * Guzzle http client configured with binary headers
-     * @var GuzzleHttp\ClientInterface $http
-     */
-    private $bin_http;
-    
-    /**
-     * Options that can be configured for the client
-     * @var array
-     */
-    private $options = array(
-        'timeout' => 90,
-        'server' => self::API_BASE_PATH,
-        'agent' => self::USER_AGENT_SUFFIX,
-        'version' => self::LIBVER
-    );
+    private $http_client;
+
+    private $api_address = self::API_BASE_PATH;
 
     /**
      * Construct the Algorithmia client
      * @param string $in_key 
-     * @param string $in_baseurl URL for the server: "https://api.algorithmia.com/v1/algo/"
+     * @param string $in_baseurl URL for the server: "https://api.algorithmia.com"
      */
     public function __construct($in_key, $in_baseurl=null) {
         $this->key = preg_replace('/\n/','',$in_key);
 
-        //make sure there is a trailing slash
-        if(!is_null($in_baseurl)) {
-            $this->options['server'] = rtrim($in_baseurl,"/")."/";
-        }
+        if(!is_null($in_baseurl))
+            $this->api_address = $this->getDomainFromURL($in_baseurl);
+
+        $this->http_client = new HttpClient(['server' => $this->api_address, 'key' => $this->key]);
     }
 
     /**
@@ -70,21 +54,20 @@ class Client {
 
     /**
      * Set options for the Algo Client
-     * @param array Array of parameters:  ['timeout' => 120, 'server' => 'https://api.algorithmia.com/v2/algo/']
+     * @param array Array of parameters:  ['timeout' => 120, 'server' => 'https://api.algorithmia.com']
      * @return Algorithmia\Client
      */
     public function setOptions(array $in_options = array()) {
-        $this->options = array_merge($this->options, $in_options);
-
-        //setting the options needs to drop the cached guzzle clients so they will be recreated
-        $this->json_http = null;
-        $this->bin_http = null;
-
-        return $this;
+        if(array_key_exists('server',$in_options))
+        {
+            $in_options['server'] = $this->getDomainFromURL($in_options['server']);
+            $this->api_address = $in_options['server'];
+        }
+        return $this->http_client->setOptions($in_options);
     }
 
     public function getOptions() {
-        return $this->options;
+        return $this->http_client->getOptions();
     }
 
     /**
@@ -106,21 +89,25 @@ class Client {
     }
 
     /**
-     * Do the synchronous call and return the result.
+     * Do the synchronous POST call and return the result.
      * @param string $in_algo The algorithm to call.
      * @param mixed $in_input The input to send to the algorithm. Can be a string or an object.
      * @return Algorithmia\AlgoResponse the AlgoResponse object for the result
      */
-    public function doSynchronousCall(string $in_algo, $in_input) {
-        $response = null;
+    public function doAlgoPipe(string $in_algo, $in_input) {
 
-        //call either json or binary depending on the input
+        $algo_url = $this->getAlgoUrl($in_algo);
+
+        $content_type = HttpClient::CONTENT_TYPE_JSON;
+        $input = $in_input;
+
+        //check if it is binary input
         if (is_object($in_input) && get_class($in_input) == ByteArray::class) {
-            $response = $this->doSynchronousBinaryCall($in_algo, $in_input->getData());
-        } 
-        else {
-            $response = $this->doSynchronousJsonCall($in_algo, $in_input);
+            $input = $in_input->getData();
+            $content_type = HttpClient::CONTENT_TYPE_OCTET_STREAM;
         }
+
+        $response = $this->http_client->post($algo_url, $input, $content_type);
 
         $str_result = $response->getBody()->getContents();
         $obj_result = json_decode($str_result);
@@ -148,72 +135,20 @@ class Client {
     }
 
     /**
-     * @param $in_url string of URL to call
-     * @param $in_payload mixed payload to deliver to algorithm. Can be a string or an object.
-     * @return httpresponse Object
+     * Builds the data url from the server + "/v1/" + connector e.g.: "https://api.algorithmia.com/v1/data/"
+     * @return string data api url
      */
-    private function doSynchronousJsonCall(string $in_url, $in_payload = "") {
-        $http_client = $this->getJsonHttpClient();
-
-        $response = $http_client->post($in_url, ['json' => $in_payload, 'timeout' => $this->options['timeout']]);
-
-        return $response;
+    public function getDataUrl(string $in_connector){
+        return $this->api_address . self::API_VERSION . $in_connector . "/";
     }
 
-    /**
-     * @param $in_url string of URL to call
-     * @param $in_payload mixed payload to deliver to algorithm. Can be a string or an object.
-     * @return httpresponse object
-     */
-    private function doSynchronousBinaryCall(string $in_url, $in_payload = "") {
-        $http_client = $this->getBinaryHttpClient();
-
-        $response = $http_client->post($in_url, ['body' => $in_payload, 'timeout' => $this->options['timeout']]);
-
-        return $response;
+    public function getAlgoUrl($in_algo){
+        return $this->api_address . self::API_VERSION . self::ALGO_SUFFIX . $in_algo;
     }
 
-    public function getBinaryHttpClient()
-    {
-        if(null === $this->bin_http) {
-            $this->bin_http = $this->createBinaryHttpClient();
-        }
-
-        return $this->bin_http;
+    public function getDomainFromURL(string $in_url){
+        preg_match('/^(?P<domain>https?:\/\/[^\/]*)/',$in_url,$url_parts);
+        return $url_parts['domain'];
     }
-
-    public function getJsonHttpClient()
-    {
-        if(null === $this->json_http) {
-            $this->json_http = $this->createJsonHttpClient();
-        }
-
-        return $this->json_http;
-    }
-
-    private function createJsonHttpClient()
-    {
-        return new \GuzzleHttp\Client($this->getGuzzleHttpOptions(self::CONTENT_TYPE_JSON));
-    }
-
-    private function createBinaryHttpClient()
-    {
-        return new \GuzzleHttp\Client($this->getGuzzleHttpOptions(self::CONTENT_TYPE_OCTET_STREAM));
-    }
-
-    private function getGuzzleHttpOptions($in_content_type){
-        $header_options = [
-            'base_uri' => $this->options['server'],
-            'headers' => ['Content-Type' => $in_content_type]
-        ];
-
-        if(isset($this->key)){
-            $header_options['headers']['Authorization'] = 'Simple '.$this->key;
-        }
-
-        return $header_options;
-    }
-
-
 }
 

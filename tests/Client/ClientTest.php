@@ -99,11 +99,11 @@ final class ClientTest extends BaseTest
 
     public function testClientConstructorBaseURL() {
 
-        $nonexistent_server = "https://algorithmia.com/api/v777/algo/";
+        $nonexistent_server = "https://aaaapppi.algorithmia.com/api/v777/algo/";
 
         $client = new Algorithmia\Client("ABC123", $nonexistent_server);
         
-        $this->assertEquals($nonexistent_server, $client->getOptions()['server']);
+        $this->assertEquals("https://aaaapppi.algorithmia.com", $client->getOptions()['server']);
 
         $algo = $client->algo(self::ALGORITHM_SUMMARIZER);
 

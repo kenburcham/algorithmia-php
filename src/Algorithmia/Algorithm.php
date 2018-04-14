@@ -36,7 +36,7 @@ class Algorithm {
      */
     public function pipe($in_input) 
     {
-        return $this->client->doSynchronousCall($this->algoUrl, $in_input);
+        return $this->client->doAlgoPipe($this->algoUrl, $in_input);
     }
 
     /**
