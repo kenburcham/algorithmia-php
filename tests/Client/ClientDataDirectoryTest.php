@@ -15,6 +15,12 @@ final class ClientDataDirectoryTest extends BaseTest
         $this->assertCount(1,$foo_dir->files());
     }
 
+    public function testListDirectoryRequiresClient()
+    {
+        $dir = new Algorithmia\DataDirectory("data://.my/foo");
+        $this->expectException(\Algorithmia\AlgoException::class);
+        $foo_dir = $dir->files(); 
+    }
 
     public function testConstructor(){
         $dir = new Algorithmia\DataDirectory("data://.my/foo");
@@ -48,14 +54,14 @@ final class ClientDataDirectoryTest extends BaseTest
     public function testGetDataUrl(){
         $client = $this->getClient();
         $dir = new Algorithmia\DataDirectory("s3://.my/foo", $client); //sending in the client now
-        $this->assertEquals("https://api.algorithmia.com/v1/s3/", $client->getDataUrl($dir->getConnector()));
+        $this->assertEquals("https://api.algorithmia.com/v1/connector/s3/.my/foo", $client->getDataUrl($dir->getConnector(),$dir->getPath()));
     }
 
     public function testGetDataAPIUrlAfterSetServer(){
         $client = $this->getClient();
         $client->setOptions(['server' => 'https://api2.algorithmia.com']);
         $dir = new Algorithmia\DataDirectory("data://.my/foo", $client); 
-        $this->assertEquals("https://api2.algorithmia.com/v1/data/", $client->getDataUrl($dir->getConnector()));
+        $this->assertEquals("https://api2.algorithmia.com/v1/connector/data/.my/foo", $client->getDataUrl($dir->getConnector(),$dir->getPath()));
     }
 
 }

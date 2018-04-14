@@ -56,8 +56,9 @@ class HttpClient {
         return $this;
     }
 
-    public function get(string $in_url, $in_input, string $in_content_type){
-
+    public function get(string $in_url, string $in_content_type){
+        $client = $this->getJsonHttpClient();
+        return $client->get($in_url, ['timeout' => $this->options['timeout']]);        
     }
 
     /**

@@ -35,16 +35,24 @@ class DataDirectory {
             throw new AlgoException("connection type is invalid: "+ $this->connector);
         }
 
-        if(isset($this->client)){
-            $this->sync();
-        }
+        //if(isset($this->client)){
+        //    $this->sync();
+        //}
     }
 
     
 
     public function sync(){
-        if(!isset($this->client)){
+        if(is_null($this->client)){
             throw new AlgoException("client must be set");
+        }
+
+        $response = $this->client->doDataGet($this->connector, $this->path);
+        if(property_exists($response, 'files')){
+            $this->files = $response->files;
+        }
+        if(property_exists($response, 'folders')){
+            $this->folders = $response->folders;
         }
 
 
@@ -71,7 +79,7 @@ class DataDirectory {
     }
 
     public function files(){
-
+        $this->sync();
         return $this->files;
     }
 
