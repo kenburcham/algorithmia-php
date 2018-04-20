@@ -38,8 +38,6 @@ class DataDirectory {
         preg_match('((?P<parent>.*)\/(?P<name>.*))',$this->path, $name_parts);
         if(array_key_exists('name',$name_parts))
             $this->name = $name_parts['name'];
-        else
-            $this->name = $this->path;
         
         if(array_key_exists('parent',$name_parts))
             $this->parent = $name_parts['parent'];
