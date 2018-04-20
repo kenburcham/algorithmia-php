@@ -2,51 +2,11 @@
 
 namespace Algorithmia;
 
-class DataDirectory {
-
-    private $client;
-    
-    private $dataUrl;
-    private $connector;
-    private $path;
-    private $name; 
-    private $parent;
+class DataDirectory extends DataObject {
 
     private $folders;
     private $files;
     private $marker;
-    private $acl;
-
-    private $response;
-
-
-    /**
-     * Constructs a DataDirectory object ready for fetching or creating
-     * @param string $in_dataurl The URL for the datadirectory to represent
-     * @param Algorithmia\Client $client The client object to use if you want to actually connect.
-     * @return Algorithmia\DataDirectory 
-     */
-    public function __construct(string $in_dataurl, Client $in_client = null){
-        $this->client = $in_client;
-        $this->dataUrl = rtrim($in_dataurl,"/");
-
-        preg_match('/(?P<connection>\w+):\/\/(?P<path>.*)/', $this->dataUrl, $url_parts);
-
-        $this->connector = $url_parts['connection'];
-        $this->path = $url_parts['path'];
-
-        preg_match('((?P<parent>.*)\/(?P<name>.*))',$this->path, $name_parts);
-        if(array_key_exists('name',$name_parts))
-            $this->name = $name_parts['name'];
-        
-        if(array_key_exists('parent',$name_parts))
-            $this->parent = $name_parts['parent'];
-
-        if(!DataConnectors::isValidConnector($this->connector)){
-            throw new AlgoException("connection type is invalid: "+ $this->connector);
-        }
-    }
-
     
     /**
      * Call the Algorithmia API and populate ourselves.
@@ -107,31 +67,6 @@ class DataDirectory {
         return $containsFolder;
     }
 
-    public function exists(){
-        $response = $this->client->doDataGet($this->connector, $this->path);
-        return ($response->getStatusCode() == 200);
-    }
-
-    public function getConnector(){
-        return $this->connector;
-    }
-
-    public function getPath(){
-        return $this->path;
-    }
-
-    public function getDataUrl(){
-        return $this->dataUrl;
-    }
-
-    public function getName(){
-        return $this->name;
-    }
-
-    public function getParent(){
-        return $this->parent;
-    }
-
     public function folders(){
         $this->sync();
         return $this->folders;
@@ -142,16 +77,24 @@ class DataDirectory {
         return $this->files;
     }
 
+    /**
+     * Gets a reference to a directory's child DataFile
+     */
+    public function file($in_name){
+        return new DataFile($in_name, $this->client);
+    }
+
+    public function putFile(DataFile $in_file){
+        
+    }
+
+    public function list(){
+        $this->sync();
+        return array_merge($this->files, $this->folders);
+    }
+
     public function marker(){
         return $this->marker();
-    }
-
-    public function acl(){
-        return $this->acl;
-    }
-
-    public function getResponse(){
-        return $this->response;
     }
 
 }

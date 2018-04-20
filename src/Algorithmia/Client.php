@@ -88,6 +88,22 @@ class Client {
         return new DataDirectory($in_dataurl, $this);
     }
 
+    /**
+     * Get an Algorithmia\DataFile that represents a file.
+     * @param string $in_dataurl The full path to the file, e.g.: data://.my/folder/file.txt
+     * @return Algorithmia\DataFile
+     */
+    public function file(string $in_datafile) {
+        return new DataFile($in_datafile, $this);
+    }
+
+    public function doFileGet(string $in_connector, string $in_path){
+        $data_url = $this->getDataUrl($in_connector, $in_path);
+        $response = $this->http_client->get($data_url, HttpClient::CONTENT_TYPE_OCTET_STREAM);
+
+        return $response;  
+    }
+
     public function doDataGet(string $in_connector, string $in_path){
 
         $data_url = $this->getDataUrl($in_connector, $in_path);

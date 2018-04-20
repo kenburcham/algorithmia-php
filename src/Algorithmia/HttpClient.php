@@ -57,7 +57,7 @@ class HttpClient {
     }
 
     public function get(string $in_url, string $in_content_type){
-        $client = $this->getJsonHttpClient();
+        $client = $this->getClientForType($in_content_type);
         return $client->get($in_url, ['timeout' => $this->options['timeout']]);        
     }
 
@@ -68,15 +68,8 @@ class HttpClient {
      */
     public function post(string $in_url, $in_input, string $in_content_type){
 
-        if($in_content_type == self::CONTENT_TYPE_JSON)
-        {
-            $client = $this->getJsonHttpClient();
-            $body_name = 'json';
-        }
-        else if($in_content_type == self::CONTENT_TYPE_OCTET_STREAM) {
-            $client = $this->getBinaryHttpClient();
-            $body_name = 'body';
-        }
+        $client = $this->getClientForType($in_content_type);
+        $body_name = $this->getBodyNameForType($in_content_type);
         
         return $client->post($in_url, [$body_name => $in_input, 'timeout' => $this->options['timeout']]);
     }
@@ -86,6 +79,27 @@ class HttpClient {
         return $client->delete($in_url);
     }
 
+    public function getClientForType(string $in_content_type) {
+        if($in_content_type == self::CONTENT_TYPE_JSON)
+        {
+            $client = $this->getJsonHttpClient();
+        }
+        else if($in_content_type == self::CONTENT_TYPE_OCTET_STREAM) {
+            $client = $this->getBinaryHttpClient();
+        }
+        return $client;
+    }
+
+    public function getBodyNameForType(string $in_content_type) {
+        if($in_content_type == self::CONTENT_TYPE_JSON)
+        {
+            $body_name = 'json';
+        }
+        else if($in_content_type == self::CONTENT_TYPE_OCTET_STREAM) {
+            $body_name = 'body';
+        }
+        return $body_name;
+    }
 
     public function getBinaryHttpClient()
     {
