@@ -116,6 +116,16 @@ class Client {
         return $obj_result;
     }
 
+    public function doDataPost(string $in_connector, string $in_path, $in_input){
+        $data_url = $this->getDataUrl($in_connector, $in_path);
+        $content_type = HttpClient::CONTENT_TYPE_JSON;
+
+        $response = $this->http_client->post($data_url, $in_input, HttpClient::CONTENT_TYPE_JSON);
+
+        return $response;
+
+    }
+
     /**
      * Do the synchronous POST call and return the result.
      * @param string $in_algo The algorithm to call.

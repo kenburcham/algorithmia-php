@@ -3,16 +3,21 @@
 namespace Algorithmia;
 
 class ACL {
-    const READABLE_BY_ANYONE = ["user://*"];
-    const READABLE_BY_YOUR_ALGORITHMS = ["algo://.my/*"];
-    const FULLY_PRIVATE = [];
-    
+    const ANYONE = "user://*"; //["user://*"];
+    const MY_ALGORITHMS = "algo://.my/*"; //["algo://.my/*"];
+    const FULLY_PRIVATE = ""; //[];
+
+    const DEFAULT = self::MY_ALGORITHMS;
 
     /**
-     * Call with: ACL::getACLJson(ACL::READABLE_BY_ANYONE)
+     * Call with: ACL::getACLJson(ACL::ANYONE)
+     * @param string One of the valid ACL constants
+     * @return array Array of "read" + the ACL string wrapped in an array.
      */
-    public static function getACLJson(array $in_type_array){
-        $aclJson = ["acl" => ["read" => $in_type_array]];
-        return json_encode($aclJson);
+    public static function getACLJson(string $in_type){
+        $acl_type_array = ($in_type == self::FULLY_PRIVATE) ? [] : [$in_type];
+        $aclJson = ["read" => $acl_type_array];
+        return $aclJson; //json_encode($aclJson);
     }
+
 }

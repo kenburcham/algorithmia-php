@@ -34,6 +34,7 @@ final class ClientDataDirectoryTest extends BaseTest
 
         $this->assertEquals("foo",$dir->getName());
         $this->assertEquals(".my/foo",$dir->getPath());
+        $this->assertEquals(".my",$dir->getParent());
         $this->assertEquals("data",$dir->getConnector());
     }
 
@@ -47,6 +48,7 @@ final class ClientDataDirectoryTest extends BaseTest
 
         $this->assertEquals("foo",$dir->getName());
         $this->assertEquals(".my/foo",$dir->getPath());
+        $this->assertEquals(".my",$dir->getParent());
         $this->assertEquals("data",$dir->getConnector());
     }
 
@@ -55,6 +57,7 @@ final class ClientDataDirectoryTest extends BaseTest
 
         $this->assertEquals("morefoo",$dir->getName());
         $this->assertEquals(".my/foo/morefoo",$dir->getPath());
+        $this->assertEquals(".my/foo", $dir->getParent());
         $this->assertEquals("s3",$dir->getConnector());
     }
 
@@ -69,6 +72,34 @@ final class ClientDataDirectoryTest extends BaseTest
         $client->setOptions(['server' => 'https://api2.algorithmia.com']);
         $dir = new Algorithmia\DataDirectory("data://.my/foo", $client); 
         $this->assertEquals("https://api2.algorithmia.com/v1/connector/data/.my/foo", $client->getDataUrl($dir->getConnector(),$dir->getPath()));
+    }
+
+    public function testCreateDataDirectory() {
+        $client = $this->getClient();
+
+        $newdir = $client->dir("data://.my/fooNew2")->create();
+
+        $this->assertInstanceOf(\Algorithmia\DataDirectory::class, $newdir);
+
+        //we can check the response also:
+        $this->assertEquals("OK", $newdir->getResponse()->getReasonPhrase());
+        $this->assertEquals(200, $newdir->getResponse()->getStatusCode());
+
+        //check and see that dir now appears in our dir list!
+        $dirs = $client->dir('data://.my');
+
+        $hasFolder = false;
+
+        foreach($dirs->folders() as $folder){
+            if($folder->name == "fooNew2" )
+                $hasFolder = true;
+        }
+
+        $this->assertTrue($hasFolder);
+
+        //clean up by deleting the folder.
+        //$newdir->delete();
+
     }
 
 }

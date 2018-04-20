@@ -10,6 +10,7 @@ class DataDirectory {
     private $connector;
     private $path;
     private $name; 
+    private $parent;
 
     private $folders;
     private $files;
@@ -19,6 +20,12 @@ class DataDirectory {
     private $response;
 
 
+    /**
+     * Constructs a DataDirectory object ready for fetching or creating
+     * @param string $in_dataurl The URL for the datadirectory to represent
+     * @param Algorithmia\Client $client The client object to use if you want to actually connect.
+     * @return Algorithmia\DataDirectory 
+     */
     public function __construct(string $in_dataurl, Client $in_client = null){
         $this->client = $in_client;
         $this->dataUrl = rtrim($in_dataurl,"/");
@@ -28,20 +35,22 @@ class DataDirectory {
         $this->connector = $url_parts['connection'];
         $this->path = $url_parts['path'];
 
-        preg_match('/(?P<name>[^\/]*)$/',$this->path, $name_parts);
-        $this->name = $name_parts['name'];
+        preg_match('((?P<parent>.*)\/(?P<name>.*))',$this->path, $name_parts);
+        if(array_key_exists('name',$name_parts))
+            $this->name = $name_parts['name'];
+        
+        if(array_key_exists('parent',$name_parts))
+            $this->parent = $name_parts['parent'];
 
         if(!DataConnectors::isValidConnector($this->connector)){
             throw new AlgoException("connection type is invalid: "+ $this->connector);
         }
-
-        //if(isset($this->client)){
-        //    $this->sync();
-        //}
     }
 
     
-
+    /**
+     * Call the Algorithmia API and populate ourselves.
+     */
     public function sync(){
         if(is_null($this->client)){
             throw new AlgoException("client must be set");
@@ -55,14 +64,23 @@ class DataDirectory {
             $this->folders = $response->folders;
         }
 
-        //var_dump($response);
-
-
+        $this->response = $response;
     }
 
-    public function create(string $in_name, $in_acl)
+    /** 
+    * Create a directory 
+    * @param 
+    */
+    public function create($in_acl = ACL::DEFAULT)
     {
-        
+        if(is_null($this->client)){
+            throw new AlgoException("client must be set");
+        }
+
+        $input = ["name" => $this->name, "acl" => ACL::getACLJson($in_acl)];
+        $this->response = $this->client->doDataPost($this->connector, $this->parent, $input);
+
+        return $this;
     }
 
     public function getConnector(){
@@ -81,6 +99,10 @@ class DataDirectory {
         return $this->name;
     }
 
+    public function getParent(){
+        return $this->parent;
+    }
+
     public function folders(){
         $this->sync();
         return $this->folders;
@@ -97,6 +119,10 @@ class DataDirectory {
 
     public function acl(){
         return $this->acl;
+    }
+
+    public function getResponse(){
+        return $this->response;
     }
 
 }
