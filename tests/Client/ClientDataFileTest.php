@@ -17,6 +17,17 @@ final class ClientDataFileTest extends BaseTest
         $this->assertEquals("data",$file->getConnector());
     }
 
+    public function testCreateFooIfNecessary(){
+        $client = $this->getClient();
+        
+        $foo_file = $client->file(self::FOOFILE);
+        $foo_dir = $foo_file->parent();
+
+        if(!$foo_dir->exists())
+            $foo_dir->create();
+        
+        $this->assertTrue($foo_dir->exists());
+    }
 
     public function testClientFile(){
         $client = $this->getClient();    
@@ -30,7 +41,7 @@ final class ClientDataFileTest extends BaseTest
         $this->assertInstanceOf(Algorithmia\DataFile::class, $file);
     }
 
-    public function testPutGetFile(){
+    public function testPutDeleteFile(){
         $client = $this->getClient();
         $file = $client->file(self::FOOFILE);
 
@@ -55,6 +66,24 @@ final class ClientDataFileTest extends BaseTest
         $this->assertFalse($client->file(self::FOOFILE)->exists());
     }
 
+    public function testPutJsonFile(){
+        $client = $this->getClient();
+
+        $response = $client->file("data://.my/foo/Optimus_Prime.json")->putJson(["faction" => "Autobots"]);
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $client->file("data://.my/foo/Optimus_Prime.json")->delete();
+    }
+
+    public function testPutTextFile(){
+        $client = $this->getClient();
+
+        $file = $client->file("data://.my/foo/Optimus_Prime.txt");
+        $file->put("Leader of the Autobots");
+        $this->assertEquals(200, $file->getResponse()->getStatusCode());
+
+        $file->delete();
+    }
 
 
 }

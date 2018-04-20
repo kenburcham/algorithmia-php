@@ -48,7 +48,7 @@ class DataObject {
      * Returns a DataDirectory object representing the parent
      */
     public function parent(){
-        return new DataDirectory($connector . "://" . $this->parent);
+        return new DataDirectory($this->connector . "://" . $this->parent, $this->client);
     }
 
     public function exists(){
