@@ -97,6 +97,13 @@ class Client {
         return new DataFile($in_datafile, $this);
     }
 
+    public function doDataPut(string $in_connector, string $in_path, $in_input){
+        $data_url = $this->getDataUrl($in_connector, $in_path);
+        $response = $this->http_client->put($data_url, $in_input, HttpClient::CONTENT_TYPE_OCTET_STREAM);
+
+        return $response;
+    }
+
     public function doFileGet(string $in_connector, string $in_path){
         $data_url = $this->getDataUrl($in_connector, $in_path);
         $response = $this->http_client->get($data_url, HttpClient::CONTENT_TYPE_OCTET_STREAM);

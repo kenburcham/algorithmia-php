@@ -52,7 +52,16 @@ class DataObject {
     }
 
     public function exists(){
-        $response = $this->client->doDataGet($this->connector, $this->path);
+        try{
+            $response = $this->client->doDataGet($this->connector, $this->path);
+        }
+        catch(\Exception $e) //if 404 then the client throws an exception instead of just returning
+        {
+            $response = $e->getResponse(); 
+        }
+        
+        $this->response = $response;
+
         return ($response->getStatusCode() == 200);
     }
 

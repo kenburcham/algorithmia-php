@@ -62,8 +62,21 @@ class HttpClient {
     }
 
     /**
-     * @param $in_url string of URL to call
-     * @param $in_payload mixed payload to deliver to algorithm. Can be a string or an object.
+     * @param $in_url string of URL to call with PUT
+     * @param $in_input mixed payload to deliver to api endpoint. Can be a string or an object.
+     * @return httpresponse Object
+     */
+    public function put(string $in_url, $in_input, string $in_content_type){
+
+        $client = $this->getClientForType($in_content_type);
+        $body_name = $this->getBodyNameForType($in_content_type);
+        
+        return $client->put($in_url, [$body_name => $in_input, 'timeout' => $this->options['timeout']]);
+    }
+
+    /**
+     * @param $in_url string of URL to call with POST
+     * @param $in_input mixed payload to deliver to api endpoint. Can be a string or an object.
      * @return httpresponse Object
      */
     public function post(string $in_url, $in_input, string $in_content_type){
@@ -74,8 +87,8 @@ class HttpClient {
         return $client->post($in_url, [$body_name => $in_input, 'timeout' => $this->options['timeout']]);
     }
 
-    public function delete(string $in_url){
-        $client = $this->getJsonHttpClient();
+    public function delete(string $in_url, string $in_content_type) {
+        $client = $this->getClientForType($in_content_type);
         return $client->delete($in_url);
     }
 
