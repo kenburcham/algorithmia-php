@@ -4,30 +4,23 @@ declare(strict_types=1);
 
 final class ClientDataDirectoryTest extends BaseTest
 {
-    //basic text algorithms
-    const EXISTING_DIR = "data://.my/foo";
-
+    const HOME_DIR = "data://.my";
     
-    public function testListDirectoryContents()
+    public function testHomeDirectoryExists()
     {
         $client = $this->getClient();    
-        $foo_dir = $client->dir(self::EXISTING_DIR); //must already exist and have only one file.
-        $this->assertCount(1,$foo_dir->files());
+        $foo_dir = $client->dir(self::HOME_DIR); 
+        $this->assertTrue($foo_dir->exists());
     }
 
+    
     public function testListDirectories()
     {
         $client = $this->getClient();
         $dirs = $client->dir('data://.my');
-        $this->assertCount(2, $dirs->folders());
+        $this->assertInternalType('array', $dirs->folders()); 
     }
 
-    public function testListDirectoryRequiresClient()
-    {
-        $dir = new Algorithmia\DataDirectory("data://.my/foo");
-        $this->expectException(\Algorithmia\AlgoException::class);
-        $foo_dir = $dir->files(); 
-    }
 
     public function testConstructor(){
         $dir = new Algorithmia\DataDirectory("data://.my/foo");
@@ -52,6 +45,7 @@ final class ClientDataDirectoryTest extends BaseTest
         $this->assertEquals("data",$dir->getConnector());
     }
 
+    //this isn't supported as of yet in the actual API...
     public function testTwoLevelDirectory(){
         $dir = new Algorithmia\DataDirectory("s3://.my/foo/morefoo");
 
@@ -74,7 +68,7 @@ final class ClientDataDirectoryTest extends BaseTest
         $this->assertEquals("https://api2.algorithmia.com/v1/connector/data/.my/foo", $client->getDataUrl($dir->getConnector(),$dir->getPath()));
     }
 
-    public function testCreateDataDirectory() {
+    public function testCreateAndDeleteDataDirectory() {
         $client = $this->getClient();
 
         $newdir = $client->dir("data://.my/fooNew2")->create();
@@ -88,18 +82,24 @@ final class ClientDataDirectoryTest extends BaseTest
         //check and see that dir now appears in our dir list!
         $dirs = $client->dir('data://.my');
 
-        $hasFolder = false;
+        $this->assertTrue($dirs->containsFolder("fooNew2"));
 
-        foreach($dirs->folders() as $folder){
-            if($folder->name == "fooNew2" )
-                $hasFolder = true;
-        }
-
-        $this->assertTrue($hasFolder);
+        //also check exists
+        $this->assertTrue($client->dir("data://.my/fooNew2")->exists());
 
         //clean up by deleting the folder.
-        //$newdir->delete();
+        $newdir->delete();
+
+        //we can check the response for the delete also:
+        $this->assertEquals("OK", $newdir->getResponse()->getReasonPhrase());
+        $this->assertEquals(200, $newdir->getResponse()->getStatusCode());
+
+        //check and see that dir now appears in our dir list!
+        $dirs = $client->dir('data://.my');
+
+        $this->assertFalse($dirs->containsFolder("fooNew2"));
 
     }
+    
 
 }

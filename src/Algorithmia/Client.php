@@ -93,27 +93,8 @@ class Client {
         $data_url = $this->getDataUrl($in_connector, $in_path);
         $response = $this->http_client->get($data_url, HttpClient::CONTENT_TYPE_JSON);
 
-        $str_result = $response->getBody()->getContents();
-        $obj_result = json_decode($str_result);
+        return $response;
 
-        if(property_exists($obj_result, 'error'))
-        {
-            throw new AlgoException($obj_result->error->message);
-        }
-
-        /*
-        //convert results if they are binary
-        if($obj_result->metadata->content_type == "binary" && $obj_result->result)
-        {
-            $obj_result->result = base64_decode($obj_result->result);
-
-            if ($obj_result->result === false) {
-                throw new \Exception('base64_decode failed to decode the result');
-            }
-        }
-        */
-
-        return $obj_result;
     }
 
     public function doDataPost(string $in_connector, string $in_path, $in_input){
@@ -124,6 +105,15 @@ class Client {
 
         return $response;
 
+    }
+
+    public function doDataDelete(string $in_connector, string $in_path){
+        $data_url = $this->getDataUrl($in_connector, $in_path);
+        $content_type = HttpClient::CONTENT_TYPE_JSON;
+        
+        $response = $this->http_client->delete($data_url, HttpClient::CONTENT_TYPE_JSON);
+
+        return $response;
     }
 
     /**

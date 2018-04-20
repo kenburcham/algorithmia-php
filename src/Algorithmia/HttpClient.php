@@ -81,8 +81,9 @@ class HttpClient {
         return $client->post($in_url, [$body_name => $in_input, 'timeout' => $this->options['timeout']]);
     }
 
-    public function delete(string $in_url, $in_input, string $in_content_type){
-
+    public function delete(string $in_url){
+        $client = $this->getJsonHttpClient();
+        return $client->delete($in_url);
     }
 
 

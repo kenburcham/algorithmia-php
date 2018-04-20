@@ -38,6 +38,8 @@ class DataDirectory {
         preg_match('((?P<parent>.*)\/(?P<name>.*))',$this->path, $name_parts);
         if(array_key_exists('name',$name_parts))
             $this->name = $name_parts['name'];
+        else
+            $this->name = $this->path;
         
         if(array_key_exists('parent',$name_parts))
             $this->parent = $name_parts['parent'];
@@ -51,17 +53,23 @@ class DataDirectory {
     /**
      * Call the Algorithmia API and populate ourselves.
      */
-    public function sync(){
-        if(is_null($this->client)){
-            throw new AlgoException("client must be set");
+    public function sync()
+    {
+        $response = $this->client->doDataGet($this->connector, $this->path);
+
+        $str_result = $response->getBody()->getContents();
+        $obj_result = json_decode($str_result);
+
+        if(property_exists($obj_result, 'error'))
+        {
+            throw new AlgoException($obj_result->error->message);
         }
 
-        $response = $this->client->doDataGet($this->connector, $this->path);
-        if(property_exists($response, 'files')){
-            $this->files = $response->files;
+        if(property_exists($obj_result, 'files')){
+            $this->files = $obj_result->files;
         }
-        if(property_exists($response, 'folders')){
-            $this->folders = $response->folders;
+        if(property_exists($obj_result, 'folders')){
+            $this->folders = $obj_result->folders;
         }
 
         $this->response = $response;
@@ -73,14 +81,37 @@ class DataDirectory {
     */
     public function create($in_acl = ACL::DEFAULT)
     {
-        if(is_null($this->client)){
-            throw new AlgoException("client must be set");
-        }
-
         $input = ["name" => $this->name, "acl" => ACL::getACLJson($in_acl)];
+
         $this->response = $this->client->doDataPost($this->connector, $this->parent, $input);
 
         return $this;
+    }
+
+    public function delete($in_force = false)
+    {
+        $path_force = ($in_force) ? $this->path . "?force=true" : $this->path;
+
+        $this->response = $this->client->doDataDelete($this->connector, $path_force);
+
+        return $this;
+    }
+
+    public function containsFolder(string $in_name){
+
+        $containsFolder = false;
+
+        foreach($this->folders() as $folder){
+            if($folder->name == $in_name )
+                $containsFolder = true;
+        }
+
+        return $containsFolder;
+    }
+
+    public function exists(){
+        $response = $this->client->doDataGet($this->connector, $this->path);
+        return ($response->getStatusCode() == 200);
     }
 
     public function getConnector(){
