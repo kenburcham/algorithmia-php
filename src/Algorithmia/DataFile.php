@@ -4,24 +4,47 @@ namespace Algorithmia;
 
 class DataFile extends DataObject {
 
-    private $last_modified;
-    private $size;
+    /**
+     * When you use getFile, the contents of the file is put into $this->result
+     */
+    public $result; 
+    public $last_modified;
+    public $size;
+    public $content_type;
 
     public function getFile(){
+        $this->response = $this->client->doFileGet($this->connector, $this->path);
 
+        $this->result = $this->response->getBody()->getContents();
+        $this->last_modified = $this->response->getHeaders()['Content-Type'][0];
+        $this->content_type = $this->response->getHeaders()['Content-Type'][0];
+        $this->size = $this->response->getHeaders()['Content-Length'][0];
         
+        return $this;
+    }
+
+    public function getLastModified(){
+        return $this->last_modified;
+    }
+
+    public function getSize(){
+        return $this->size;
+    }
+
+    public function getContentType(){
+        return $this->content_type;
     }
 
     public function getBytes(){
-
+        return $this->result;
     }
 
     public function getJson(){
-
+        return json_decode($this->result);
     }
 
     public function getString(){
-
+        return $this->result;
     }
 
     public function put($in_input){
@@ -46,7 +69,7 @@ class DataFile extends DataObject {
 
     public function delete(){
         $this->response = $this->client->doDataDelete($this->connector, $this->path);
-        return $this;
+        return $this->response;
     }
 
 }

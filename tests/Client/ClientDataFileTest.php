@@ -6,7 +6,8 @@ final class ClientDataFileTest extends BaseTest
 {
     const HOME_DIR = "data://.my";
     const FOOFILE = "data://.my/foo/foofile.txt";
-    const EXAMPLE_FILE = "test_example.txt"; //file exists in test directory
+    const EXAMPLE_FILE = "test_example.txt"; //text file present in the test directory
+    const EXAMPLE_BIN_FILE = "opencv_example.png"; //binary file in the test directory
     
     public function testConstructor(){
         $file = new Algorithmia\DataFile(self::FOOFILE);
@@ -66,24 +67,57 @@ final class ClientDataFileTest extends BaseTest
         $this->assertFalse($client->file(self::FOOFILE)->exists());
     }
 
-    public function testPutJsonFile(){
+    public function testPutGetDeleteJsonFile(){
         $client = $this->getClient();
 
         $response = $client->file("data://.my/foo/Optimus_Prime.json")->putJson(["faction" => "Autobots"]);
         $this->assertEquals(200, $response->getStatusCode());
 
+        $file_json = $client->file("data://.my/foo/Optimus_Prime.json")->getFile()->getJson();
+
+        $this->assertEquals("Autobots",$file_json->faction);
+
         $client->file("data://.my/foo/Optimus_Prime.json")->delete();
     }
 
-    public function testPutTextFile(){
+    public function testPutGetDeleteTextFile(){
         $client = $this->getClient();
 
         $file = $client->file("data://.my/foo/Optimus_Prime.txt");
         $file->put("Leader of the Autobots");
         $this->assertEquals(200, $file->getResponse()->getStatusCode());
 
+        $file_string_from_server = $client->file("data://.my/foo/Optimus_Prime.txt")->getFile()->getString();
+
+        $this->assertEquals("Leader of the Autobots",$file_string_from_server);
+
         $file->delete();
     }
+
+
+    public function testPutGetDeleteBinaryFile(){
+        $client = $this->getClient();
+        $bin_file = $this->testDir . '/'. self::EXAMPLE_BIN_FILE;
+
+        $response = $client->file("data://.my/foo/opencv_test.png")->putFile($bin_file);
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $file = $client->file("data://.my/foo/opencv_test.png")->getFile();
+        $this->assertEquals(200, $file->getResponse()->getStatusCode());
+        $this->assertEquals("image/png", $file->getContentType());
+        $this->assertEquals(275091 , $file->getSize());
+
+        $local_file = $this->testDir . '/from_server.png';
+
+        //if you want to write the file out to the file system you can: 
+        file_put_contents($local_file, $file->result);
+        $this->assertTrue(file_exists($local_file));
+        unlink($local_file);
+
+        $response = $client->file("data://.my/foo/opencv_test.png")->delete();
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+
 
 
 }
