@@ -89,7 +89,130 @@ $response = $client->algo('util/echo')->setOptions(['timeout' => 60])->pipe($inp
 ```
 
 ## Working with data
-WIP
+The Algorithmia client also provides a way to manage both Algorithmia hosted data
+and data from Dropbox or S3 accounts that you've connected to you Algorithmia account.
+
+### List items in a directory
+Work with a directory by instantiating a `DataDirectory` object.
+
+```PHP
+$foo = $client->dir("data://.my/foo");
+
+//now you can iterate files, folders or all items:
+
+// List files in "foo"
+foreach($foo->files() as $file){
+    echo $file->getPath();
+}
+
+// List directories in "foo"
+foreach ($foo->dirs() as $dir){
+    echo $dir->getPath();
+}
+
+// List everything in "foo"
+foreach ($foo->list() as $item) {
+    echo $item->getPath();
+}
+
+//Does it have this child folder?
+$home = $client->dir("data://.my");
+if($home->containsFolder("foo")) {...}
+
+//or does a certain folder exist?
+if($client->dir("data://.my/foo2")->exists()){..}
+
+```
+
+
+### Create directories
+Create directories by instantiating a `DataDirectory` object and calling `create()`.
+
+```PHP
+$foo = $client->dir("data://.my/foo");
+if(!$foo->exists()) {
+    $foo->create();
+}
+
+//or just try to create it directly:
+$client->dir("dropbox://mynewfolder")->create();
+```
+
+### Upload files to a directory
+
+Upload files by calling `put` on a `DataFile` object, 
+or by calling `putFile` on a `DataDirectory` object.
+
+```PHP
+$foo = $client->dir("data://.my/foo");
+
+//file.csv will be put into "foo" directory
+$foo->putFile("/path/to/my/file.csv"); 
+
+//you can also put a file directly to a folder with the name you want:
+$client->file("data://.my/foo/my_new_file.txt")->put("/path/to/thefile.txt");
+
+//quick put of text to a text file
+$foo->file("sample.txt")->put("sample text information"); //write a new "sample.txt" in "foo" that has this text
+
+//
+$response = $client->file("data://.my/foo/binary_test.png")->putFile('/path/to/binary/file.png');
+if($response->getStatusCode() !== 200) {...}; //you can also check the result of your action
+
+
+```
+
+Note: you can instantiate a `DataFile` by either `$client->file(path)` or `$client->dir(path)->file(filepath)`
+
+
+### Download contents of file
+
+Download files by calling `getString`, `getBytes`, `getJson`, or `getFile` on a `DataFile` object:
+
+```PHP
+$foo_dir = $client->dir("data://.my/foo");
+$sampleText = $foo_dir->file("sample.txt")->getString();  # String object
+$binaryContent = $foo_dir->file("binary_file.jpg")->getBytes();  # Binary data
+$jsonObject = $foo_dir->file("myfile.json")->getJson(); #Json object
+$tempFile = $foo_dir->file("myfile.csv")->getFile();   # Open file descriptor
+```
+
+### Delete files and directories
+
+Delete files and directories by calling `delete` on their respective `DataFile` or `DataDirectory` object.
+DataDirectories take an optional `force` parameter that indicates whether the directory should be deleted
+if it contains files or other directories.
+
+```PHP
+$foo_dir = $client->dir("data://.my/foo");
+$foo_dir->file("sample.txt")->delete();
+$foo_dir->delete(true); // true implies force deleting the directory and its contents
+```
+
+
+
+### Manage directory permissions
+
+Directory permissions may be set when creating a directory, or may be updated on already existing directories.
+
+```PHP
+$foo = $client->dir("data://.my/foo_public");
+
+//create the foo_public directory if it doesn't exist
+if(!$foo->exists()){
+    $foo->create(Algorithmia\ACL::ANYONE);
+}
+
+$client->dir("data://.my/foo_myalgos")->create(Algorithmia\ACL::MY_ALGORITHMS);   
+$client->dir("data://.my/foo_private")->create(Algorithmia\ACL::FULLY_PRIVATE);   
+
+$acl = $foo->getPermissions();  
+
+$foo->updatePermissions(Algorithmia\ACL::FULLY_PRIVATE);
+
+//check our permission
+if($foo->getPermissions()->readACL == Algorithmia\ACL::FULLY_PRIVATE ) {...}// True
+```
 
 # Running the tests
 

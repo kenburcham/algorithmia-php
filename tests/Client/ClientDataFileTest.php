@@ -5,6 +5,7 @@ declare(strict_types=1);
 final class ClientDataFileTest extends BaseTest
 {
     const HOME_DIR = "data://.my";
+    const FOODIR = "data://.my/foo";
     const FOOFILE = "data://.my/foo/foofile.txt";
     const EXAMPLE_FILE = "test_example.txt"; //text file present in the test directory
     const EXAMPLE_BIN_FILE = "opencv_example.png"; //binary file in the test directory
@@ -118,6 +119,13 @@ final class ClientDataFileTest extends BaseTest
         $this->assertEquals(200, $response->getStatusCode());
     }
 
-
+    //save a file using just the filepath. use the filename as the algo file.
+    public function testDirPutFile(){
+        $client = $this->getClient();
+        $foo_dir = $client->dir(self::FOODIR);
+        $response = $foo_dir->putFile($this->testDir . '/'. self::EXAMPLE_FILE); // like: /testdir/test_example.txt
+        $this->assertEquals(200, $response->getStatusCode());
+        $client->file(self::FOODIR.'/'.self::EXAMPLE_FILE)->delete();
+    }
 
 }
