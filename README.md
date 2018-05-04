@@ -150,17 +150,17 @@ $foo->putFile("/path/to/my/file.csv");
 //you can also put a file directly to a folder with the name you want:
 $client->file("data://.my/foo/my_new_file.txt")->put("/path/to/thefile.txt");
 
-//quick put of text to a text file
+//put text directly into a new text file
 $foo->file("sample.txt")->put("sample text information"); //write a new "sample.txt" in "foo" that has this text
 
-//
+//upload a binary file with a different name
 $response = $client->file("data://.my/foo/binary_test.png")->putFile('/path/to/binary/file.png');
 if($response->getStatusCode() !== 200) {...}; //you can also check the result of your action
 
 
 ```
 
-Note: you can instantiate a `DataFile` by either `$client->file(path)` or `$client->dir(path)->file(filepath)`
+Note: you can instantiate a `DataFile` by either `$client->file(path+filename)` or `$client->dir(path)->file(filename)`
 
 
 ### Download contents of file

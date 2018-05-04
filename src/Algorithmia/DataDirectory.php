@@ -4,19 +4,22 @@ namespace Algorithmia;
 
 class DataDirectory extends DataObject {
 
-    private $folders;
-    private $files;
-    private $marker;
+    private $folders = [];
+    private $files = [];
     
     /**
      * Call the Algorithmia API and populate ourselves.
      */
-    public function sync()
+    public function sync($in_marker = null)
     {
-        $response = $this->client->doDataGet($this->connector, $this->path);
+        $path = (is_null($in_marker)) ? $this->path : $this->path . '?marker=' . $in_marker;
+
+        $response = $this->client->doDataGet($this->connector, $path);
 
         $str_result = $response->getBody()->getContents();
         $obj_result = json_decode($str_result);
+
+        //echo print_r($obj_result, true);
 
         if(property_exists($obj_result, 'error'))
         {
@@ -24,13 +27,18 @@ class DataDirectory extends DataObject {
         }
 
         if(property_exists($obj_result, 'files')){
-            $this->files = $obj_result->files;
+            $this->files = array_merge($this->files, $obj_result->files);
         }
         if(property_exists($obj_result, 'folders')){
-            $this->folders = $obj_result->folders;
+            $this->folders = array_merge($this->folders, $obj_result->folders);
+        }
+
+        if(property_exists($obj_result, 'marker')){
+            $this->sync($obj_result->marker); //recursively call until we have all of the files
         }
 
         $this->response = $response;
+       
     }
 
     /** 
@@ -50,8 +58,15 @@ class DataDirectory extends DataObject {
     {
         $path_force = ($in_force) ? $this->path . "?force=true" : $this->path;
 
-        $this->response = $this->client->doDataDelete($this->connector, $path_force);
-
+        try {
+            $this->response = $this->client->doDataDelete($this->connector, $path_force);
+        }
+        catch(\Exception $e)
+        {
+            $error = json_decode($e->getResponse()->getBody()->getContents())->error;
+            throw new AlgoException($error->message);
+        }
+        
         return $this;
     }
 
@@ -79,9 +94,18 @@ class DataDirectory extends DataObject {
 
     /**
      * Gets a reference to a directory's child DataFile
+     * @param $in_name can be full path "data://.my/somefolder/myfile.txt" or "myfile.txt" located in this directory
+     * @return DataFile file object
      */
     public function file($in_name){
-        return new DataFile($in_name, $this->client);
+
+        if(strpos($in_name, '://')){
+            $file = new DataFile($in_name, $this->client); 
+        } else {
+            $file = new DataFile($this->getDataUrl().'/'.$in_name, $this->client);
+        }
+
+        return $file;
     }
 
     public function putFile(string $in_filepath){

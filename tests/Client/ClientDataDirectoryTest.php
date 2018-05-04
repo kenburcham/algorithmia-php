@@ -13,7 +13,14 @@ final class ClientDataDirectoryTest extends BaseTest
         $this->assertTrue($foo_dir->exists());
     }
 
-    
+    public function testDirectoryDoesNotExist()
+    {
+        $client = $this->getClient();
+        $no_dir = $client->dir("data://.my/this_does_not_exist");
+        $this->assertFalse($no_dir->exists());
+    }
+
+
     public function testListDirectories()
     {
         $client = $this->getClient();
@@ -100,6 +107,49 @@ final class ClientDataDirectoryTest extends BaseTest
         $this->assertFalse($dirs->containsFolder("fooNew2"));
 
     }
+
+    public function testDeleteWithForce() {
+        $client = $this->getClient();
+        
+        $newdir = $client->dir("data://.my/fooNew2")->create();
+        $this->assertTrue($newdir->exists());
+
+        $response = $newdir->file("Secret.txt")->put("42");
+        $this->assertEquals(200, $response->getStatusCode());
+
+        //delete will fail because folder has contents
+        $this->expectException(\Algorithmia\AlgoException::class);
+        $newdir->delete();
+
+        $this->assertTrue($newdir->exists());
+
+        $newdir->delete(true);
+        $this->assertFalse($newdir->exists());
+
+    }
     
+    //the api only returns 1000 records at a time, but our client should return them all.
+    public function testListFilesWithPaging() {
+        $client = $this->getClient();
+        
+        $num_files = 1100;
+
+        //if "many_files" doesn't already exist we will create it but note: this takes 10 minutes or so (for me!)
+        $newdir = $client->dir("data://.my/many_files"); 
+        if(!$newdir->exists()){
+            //create the dir and a bunch of files
+            $newdir->create();
+            for($i = 1; $i <= $num_files; $i++) {
+                $newdir->file($i.".txt")->put("not quite empty file #".$i);
+            }
+        }
+            
+        $array_of_all_files = $newdir->files();
+
+        $this->assertEquals(count($array_of_all_files), $num_files);
+
+        //$newdir->delete(true); 
+
+    }
 
 }

@@ -68,7 +68,14 @@ class DataFile extends DataObject {
     }
 
     public function delete(){
-        $this->response = $this->client->doDataDelete($this->connector, $this->path);
+        try{
+            $this->response = $this->client->doDataDelete($this->connector, $this->path);
+        }
+        catch(\Exception $e)
+        {
+            $error = json_decode($e->getResponse()->getBody()->getContents())->error;
+            throw new AlgoException($error->message);
+        }
         return $this->response;
     }
 
