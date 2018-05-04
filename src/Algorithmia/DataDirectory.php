@@ -10,9 +10,12 @@ class DataDirectory extends DataObject {
     /**
      * Call the Algorithmia API and populate ourselves.
      */
-    public function sync($in_marker = null)
+    public function sync($in_marker = null, $in_returnAcl = false)
     {
-        $path = (is_null($in_marker)) ? $this->path : $this->path . '?marker=' . $in_marker;
+        $acl = ($in_returnAcl) ? "acl=true" : "acl=false"; 
+        $path = (is_null($in_marker)) ? $this->path . '?' . $acl : $this->path . '?marker=' . $in_marker . '&' . $acl;
+
+        //echo "calling: " . $path;
 
         $response = $this->client->doDataGet($this->connector, $path);
 
@@ -21,20 +24,24 @@ class DataDirectory extends DataObject {
 
         //echo print_r($obj_result, true);
 
-        if(property_exists($obj_result, 'error'))
-        {
+        if(property_exists($obj_result, 'error')){
             throw new AlgoException($obj_result->error->message);
         }
 
         if(property_exists($obj_result, 'files')){
             $this->files = array_merge($this->files, $obj_result->files);
         }
+
         if(property_exists($obj_result, 'folders')){
             $this->folders = array_merge($this->folders, $obj_result->folders);
         }
 
         if(property_exists($obj_result, 'marker')){
             $this->sync($obj_result->marker); //recursively call until we have all of the files
+        }
+
+        if(property_exists($obj_result, 'acl')){
+            $this->acl = $obj_result->acl;
         }
 
         $this->response = $response;
@@ -126,8 +133,9 @@ class DataDirectory extends DataObject {
         return array_merge($this->files, $this->folders);
     }
 
-    public function marker(){
-        return $this->marker();
+    public function getReadAcl(){
+        $this->sync(null, true);
+        return $this->acl->read[0];
     }
 
 }

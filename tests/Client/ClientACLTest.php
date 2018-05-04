@@ -22,4 +22,24 @@ final class ClientACLTest extends BaseTest
         $private_acl_json = '{"read":[]}';
         $this->assertEquals($private_acl_json, json_encode(\Algorithmia\ACL::getACLJson(\Algorithmia\ACL::FULLY_PRIVATE)));
     }
+
+    public function testDefaultDirectoryPermissions(){
+        $client = $this->getClient();
+        $newdir = $client->dir("data://.my/fooNew2")->create(); 
+        $this->assertTrue($newdir->exists());
+
+        $this->assertEquals($newdir->getReadAcl(), \Algorithmia\ACL::DEFAULT);
+
+        $newdir->delete();
+    }
+
+    public function testPublicDirectoryPermissions(){
+        $client = $this->getClient();
+        $newdir = $client->dir("data://.my/fooNew2")->create(\Algorithmia\ACL::ANYONE); 
+        $this->assertTrue($newdir->exists());
+
+        $this->assertEquals($newdir->getReadAcl(), \Algorithmia\ACL::ANYONE);
+
+        $newdir->delete();
+    }
 }

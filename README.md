@@ -118,7 +118,7 @@ $home = $client->dir("data://.my");
 if($home->containsFolder("foo")) {...}
 
 //or does a certain folder exist?
-if($client->dir("data://.my/foo2")->exists()){..}
+if($client->dir("data://.my/foo2")->exists()) { ... }
 
 ```
 
@@ -134,6 +134,15 @@ if(!$foo->exists()) {
 
 //or just try to create it directly:
 $client->dir("dropbox://mynewfolder")->create();
+
+//note that the default permission is for only your own algorithms to view the directory. 
+// if you want to let anyone view it:
+$newdir = $client->dir("data://.my/mynewfolder")->create(ACL::ANYONE); 
+
+//check the permission on a folder like so:
+if($newdir->getReadAcl() == ACL::ANYONE) { ... }
+
+
 ```
 
 ### Upload files to a directory

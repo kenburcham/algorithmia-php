@@ -85,10 +85,6 @@ class DataObject {
         return $this->parent;
     }
 
-    public function acl(){
-        return $this->acl;
-    }
-
     public function getResponse(){
         return $this->response;
     }
