@@ -25,7 +25,8 @@ class HttpClient {
 
 
     /**
-     * Options that can be configured for the client
+     * Options that can be configured for the client. If the value is null, it is ignored
+     * otherwise the parameter will be sent along to the server as a query param.
      * @var array
      */
     private $options = array(
@@ -33,8 +34,15 @@ class HttpClient {
         'server' => null,
         'agent' => self::USER_AGENT_SUFFIX,
         'key' => null,
-        'debug' => self::DEBUG
+        'debug' => self::DEBUG,
+        'stdout' => null,
+        'output' => null
     );
+
+    /**
+     * Any options in this list will be sent to the server as query params (if not null in $options).
+     */
+    private $query_param_options = ['stdout','output']; 
 
     public function __construct(array $in_options = array()){
         $this->setOptions($in_options);
@@ -50,6 +58,7 @@ class HttpClient {
      * @return Algorithmia\Client
      */
     public function setOptions(array $in_options = array()) {
+
         $this->options = array_merge($this->options, $in_options);
 
         //setting the options needs to drop the cached clients so they will be recreated
@@ -61,7 +70,7 @@ class HttpClient {
 
     public function get(string $in_url, string $in_content_type){
         $client = $this->getClientForType($in_content_type);
-        return $client->get($in_url, ['timeout' => $this->options['timeout'], 'debug' => $this->options['debug']]);        
+        return $client->get($in_url, $this->getQueryParamArray());        
     }
 
     /**
@@ -74,7 +83,7 @@ class HttpClient {
         $client = $this->getClientForType($in_content_type);
         $body_name = $this->getBodyNameForType($in_content_type);
         
-        return $client->put($in_url, [$body_name => $in_input, 'timeout' => $this->options['timeout'], 'debug' => $this->options['debug']]);
+        return $client->put($in_url, $this->getQueryParamArray([$body_name => $in_input]));
     }
 
     /**
@@ -87,7 +96,7 @@ class HttpClient {
         $client = $this->getClientForType($in_content_type);
         $body_name = $this->getBodyNameForType($in_content_type);
         
-        return $client->post($in_url, [$body_name => $in_input, 'timeout' => $this->options['timeout'], 'debug' => $this->options['debug']]);
+        return $client->post($in_url, $this->getQueryParamArray([$body_name => $in_input]));
     }
 
     public function delete(string $in_url, string $in_content_type) {
@@ -158,5 +167,27 @@ class HttpClient {
         return $header_options;
     }
 
+    //merges the incoming array with the query param options
+    private function getQueryParamArray($in_array = array()){
+
+        $common_params = array('debug' => $this->options['debug'], 'timeout' => $this->options['timeout']);
+
+        $query_param_array = array_merge($common_params, $in_array);
+        
+        $params = array();
+
+        //if there is a allowed option set via setOptions AND it isn't null then add it to the query params
+        foreach($this->options as $key => $value){
+            if(in_array($key, $this->query_param_options) && !is_null($value)){
+                $params[$key] = $value;
+            }
+        }
+
+        if(count($params)>0){
+            $query_param_array['query'] = $params;
+        }
+
+        return $query_param_array;
+    }
 
 }

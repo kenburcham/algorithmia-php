@@ -1,10 +1,5 @@
 <?php
 
-use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Ring\Client\StreamHandler;
-use GuzzleHttp\Middleware;
-
 namespace Algorithmia;
 
 class Client {
@@ -26,6 +21,7 @@ class Client {
      * @var Algorithmia\HttpClient $http
      */
     private $http_client;
+
 
     private $api_address = self::API_BASE_PATH;
 
@@ -161,6 +157,12 @@ class Client {
         $response = $this->http_client->post($algo_url, $input, $content_type);
 
         $str_result = $response->getBody()->getContents();
+
+        if($this->getOptions()['output'] == 'raw')
+        {
+            return $str_result; //early return if they wanted raw output.
+        }
+        
         $obj_result = json_decode($str_result);
 
         if(property_exists($obj_result, 'error'))
