@@ -94,7 +94,6 @@ final class ClientTest extends BaseTest
         $response = $algo->setOptions(['timeout' => .05])->pipe($string_to_test);
         
         $client->setOptions(['timeout' => 120]); //reset to the default
-        
     }
 
     public function testClientConstructorBaseURL() {
@@ -110,7 +109,30 @@ final class ClientTest extends BaseTest
         $string_to_test = "A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution. Digital signatures provide part of the solution, but the main benefits are lost if a trusted third party is still required to prevent double-spending. We propose a solution to the double-spending problem using a peer-to-peer network. The network timestamps transactions by hashing them into an ongoing chain of hash-based proof-of-work, forming a record that cannot be changed without redoing the proof-of-work. The longest chain not only serves as proof of the sequence of events witnessed, but proof that it came from the largest pool of CPU power. As long as a majority of CPU power is controlled by nodes that are not cooperating to attack the network, they'll generate the longest chain and outpace attackers. The network itself requires minimal structure. Messages are broadcast on a best effort basis, and nodes can leave and rejoin the network at will, accepting the longest proof-of-work chain as proof of what happened while they were gone.";
         
         $this->expectException(\GuzzleHttp\Exception\RequestException::class);
-        $response = $algo->pipe($string_to_test); //should fail because the server doesn't exist.
-        
+        $response = $algo->pipe($string_to_test); //should fail because the server doesn't exist.    
     }
+
+    public function testSetOptionOutputVoid()
+    {
+        $client = $this->getClient();
+        $algo = $client->algo(self::ALGORITHM_HELLO);
+
+        $string_to_test = "HAL 9001";
+
+        $client->setOptions(['output' => 'void']); //indicates we should not wait for a result (returns a promise instead of result)
+        $response = $algo->pipe($string_to_test);
+
+        $this->assertInstanceOf(\GuzzleHttp\Promise\Promise::class, $response);   
+    }
+
+    public function testSetOptionOutputRaw()
+    {
+        $client = $this->getClient();
+        $client->setOptions(['output' => 'raw']); //indicates we should just get the raw output
+
+        $response = $client->algo('util/Echo')->pipe(['something' => 'something else']);
+
+        $this->assertEquals('{"something":"something else"}', $response);   
+    }
+
 }

@@ -70,7 +70,13 @@ class HttpClient {
 
     public function get(string $in_url, string $in_content_type){
         $client = $this->getClientForType($in_content_type);
-        return $client->get($in_url, $this->getQueryParamArray());        
+        $promise = $client->getAsync($in_url, $this->getQueryParamArray());
+        
+        if($this->options['output']=='void'){
+            return $promise;
+        }
+
+        return $promise->wait();
     }
 
     /**
@@ -96,7 +102,15 @@ class HttpClient {
         $client = $this->getClientForType($in_content_type);
         $body_name = $this->getBodyNameForType($in_content_type);
         
-        return $client->post($in_url, $this->getQueryParamArray([$body_name => $in_input]));
+        $promise = $client->postAsync($in_url, $this->getQueryParamArray([$body_name => $in_input]));
+
+        if($this->options['output']=='void'){
+            return $promise;
+        }
+
+        return $promise->wait();
+
+        
     }
 
     public function delete(string $in_url, string $in_content_type) {

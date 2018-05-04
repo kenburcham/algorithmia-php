@@ -156,11 +156,17 @@ class Client {
 
         $response = $this->http_client->post($algo_url, $input, $content_type);
 
+        //if they've requested a direct return with no waiting, return early.
+        if($this->getOptions()['output'] == 'void')
+        {
+            return $response;
+        }
+
         $str_result = $response->getBody()->getContents();
 
         if($this->getOptions()['output'] == 'raw')
         {
-            return $str_result; //early return if they wanted raw output.
+            return $str_result; //if they've requested raw output, return early.
         }
         
         $obj_result = json_decode($str_result);
@@ -169,8 +175,6 @@ class Client {
         {
             throw new AlgoException($obj_result->error->message);
         }
-
-        //var_dump($obj_result);
 
         //convert results if they are binary
         if($obj_result->metadata->content_type == "binary" && $obj_result->result)
