@@ -8,17 +8,15 @@ For API documentation, see the [PHPDocs](https://algorithmia.com/docs/lang/PHP)
 Packaging is coming soon, but for now you can clone this repository and copy the Algorithmia folder into your project and point to it with your autoloader or add "use Algorithmia;" statements directly. You'll also need to run "composer update" to get the packages the client needs.
 
 ## Authentication
-First, create an Algorithmia client and authenticate with your API key:
+First, create an Algorithmia client and authenticate with your API key. You must replace YOUR_API_KEY with your personal key:
 
 ```PHP
 use Algorithmia;
 
-$api_key = '{{Your API key here}}';
-$client = Algorithmia::client($api_key);
+$client = Algorithmia::client('YOUR_API_KEY');
 ```
 
-
-Now you're ready to call algorithms. 
+Now you're ready to call AI algorithms from your code. 
 
 ## Calling algorithms
 
@@ -37,12 +35,12 @@ $algo = $client->algo('demo/Hello/0.1.1');
 $response = $algo->pipe("HAL 9000");
 echo $response->result;    # Hello HAL 9000
 echo $response->metadata->content_type;  # text
-echo $response->metadata->duration; # 0.0002127
+echo $response->metadata->duration; # 0.0002127 (just for example; this will vary, of course)
 ```
 
 ### JSON input/output
 
-Call an algorithm with JSON input by simply passing in any object that can be serialized to JSON, such as strings or arrays. 
+Call an algorithm with JSON input by passing in any object that can be serialized to JSON such as strings or arrays. 
 For algorithms that return JSON, the `result` field of the response will be the appropriate
 deserialized type.
 

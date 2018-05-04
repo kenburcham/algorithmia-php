@@ -9,6 +9,8 @@ class HttpClient {
     const CONTENT_TYPE_TEXT = "application/text";
     const CONTENT_TYPE_OCTET_STREAM = "application/octet-stream";
 
+    const DEBUG = false;
+
      /**
      * Guzzle http client configured with json headers
      * @var GuzzleHttp\ClientInterface $json_http
@@ -27,10 +29,11 @@ class HttpClient {
      * @var array
      */
     private $options = array(
-        'timeout' => 120,
+        'timeout' => 300, //default timeout is 300s = 5 minutes
         'server' => null,
         'agent' => self::USER_AGENT_SUFFIX,
-        'key' => null
+        'key' => null,
+        'debug' => self::DEBUG
     );
 
     public function __construct(array $in_options = array()){
@@ -58,7 +61,7 @@ class HttpClient {
 
     public function get(string $in_url, string $in_content_type){
         $client = $this->getClientForType($in_content_type);
-        return $client->get($in_url, ['timeout' => $this->options['timeout']]);        
+        return $client->get($in_url, ['timeout' => $this->options['timeout'], 'debug' => $this->options['debug']]);        
     }
 
     /**
@@ -71,7 +74,7 @@ class HttpClient {
         $client = $this->getClientForType($in_content_type);
         $body_name = $this->getBodyNameForType($in_content_type);
         
-        return $client->put($in_url, [$body_name => $in_input, 'timeout' => $this->options['timeout']]);
+        return $client->put($in_url, [$body_name => $in_input, 'timeout' => $this->options['timeout'], 'debug' => $this->options['debug']]);
     }
 
     /**
@@ -84,7 +87,7 @@ class HttpClient {
         $client = $this->getClientForType($in_content_type);
         $body_name = $this->getBodyNameForType($in_content_type);
         
-        return $client->post($in_url, [$body_name => $in_input, 'timeout' => $this->options['timeout']]);
+        return $client->post($in_url, [$body_name => $in_input, 'timeout' => $this->options['timeout'], 'debug' => $this->options['debug']]);
     }
 
     public function delete(string $in_url, string $in_content_type) {
