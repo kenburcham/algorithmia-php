@@ -198,7 +198,7 @@ $foo_dir->delete(true); // true implies force deleting the directory and its con
 
 
 
-### Manage directory permissions
+### Directory permissions
 
 Directory permissions may be set when creating a directory, or may be updated on already existing directories.
 
@@ -207,18 +207,16 @@ $foo = $client->dir("data://.my/foo_public");
 
 //create the foo_public directory if it doesn't exist
 if(!$foo->exists()){
-    $foo->create(Algorithmia\ACL::ANYONE);
+    $foo->create(ACL::ANYONE);
 }
 
-$client->dir("data://.my/foo_myalgos")->create(Algorithmia\ACL::MY_ALGORITHMS);   
-$client->dir("data://.my/foo_private")->create(Algorithmia\ACL::FULLY_PRIVATE);   
-
-$acl = $foo->getPermissions();  
-
-$foo->updatePermissions(Algorithmia\ACL::FULLY_PRIVATE);
-
 //check our permission
-if($foo->getPermissions()->readACL == Algorithmia\ACL::FULLY_PRIVATE ) {...}// True
+if($foo->getReadAcl() == ACL::ANYONE) { ... } //true
+
+$client->dir("data://.my/foo_myalgos")->create(ACL::MY_ALGORITHMS);   
+$client->dir("data://.my/foo_private")->create(ACL::FULLY_PRIVATE);   
+
+
 ```
 
 # Running the tests
