@@ -258,3 +258,6 @@ Running the tests will connect to the Algorithmia server and execute a variety o
 Then you can run the tests by executing:
 `./vendor/bin/phpunit -v tests`
 
+Reading the tests is also a great way to see code examples.
+
+# Enjoy!

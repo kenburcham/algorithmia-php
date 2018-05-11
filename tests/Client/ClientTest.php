@@ -7,7 +7,7 @@ final class ClientTest extends BaseTest
     const ALGORITHM_ECHO = "util/Echo/0.2.1";
     const ALGORITHM_HELLO = "demo/Hello/0.1.0";
     const ALGORITHM_SUMMARIZER = "nlp/Summarizer/0.1.7";
-/*
+
     public function testCanGetClient()
     {
         $client = $this->getClient();
@@ -95,7 +95,7 @@ final class ClientTest extends BaseTest
         
         $client->setOptions(['timeout' => 120]); //reset to the default
     }
-*/
+
     public function testClientConstructorBaseURL() {
 
         $nonexistent_server = "https://aaaapppi.algorithmia.com/api/v777/algo/";
