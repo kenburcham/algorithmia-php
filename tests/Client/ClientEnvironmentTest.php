@@ -39,6 +39,10 @@ final class ClientEnvironmentTest extends BaseTest
         $this->assertEquals($client->getOptions()['key'], self::NOT_MY_API);
         $this->assertEquals($client->getOptions()['server'], self::NOT_BASEPATH);
 
+        //clean up or else other tests will fail. :)
+        putenv("ALGORITHMIA_API_KEY");
+        putenv("ALGORITHMIA_API");
+
     }
 }
 
