@@ -97,14 +97,14 @@ class HttpClient {
      * @param $in_input mixed payload to deliver to api endpoint. Can be a string or an object.
      * @return httpresponse Object
      */
-    public function post(string $in_url, $in_input, string $in_content_type){
+    public function post(string $in_url, $in_input, string $in_content_type, $in_async=false){
 
         $client = $this->getClientForType($in_content_type);
         $body_name = $this->getBodyNameForType($in_content_type);
         
         $promise = $client->postAsync($in_url, $this->getQueryParamArray([$body_name => $in_input]));
 
-        if($this->options['output']=='void'){
+        if($this->options['output']=='void' || $in_async){
             return $promise;
         }
 

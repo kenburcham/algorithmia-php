@@ -146,7 +146,7 @@ class Client {
      * @param mixed $in_input The input to send to the algorithm. Can be a string or an object.
      * @return Algorithmia\AlgoResponse the AlgoResponse object for the result
      */
-    public function doAlgoPipe(string $in_algo, $in_input) {
+    public function doAlgoPipe(string $in_algo, $in_input, $in_async = false) {
 
         $algo_url = $this->getAlgoUrl($in_algo);
 
@@ -159,26 +159,55 @@ class Client {
             $content_type = HttpClient::CONTENT_TYPE_OCTET_STREAM;
         }
 
-        $response = $this->http_client->post($algo_url, $input, $content_type);
+        $response = $this->http_client->post($algo_url, $input, $content_type, $in_async);
 
-        //if they've requested a direct return with no waiting, return early.
-        if($this->getOptions()['output'] == 'void')
+        //if they've requested a direct return with no waiting, return early with the request id
+        if($this->getOptions()['output'] == 'void' || $in_async)
         {
-            return $response;
+            //if this is an async request then once the promise resolves, build and return our algoresponse
+            return $response
+                ->then(function($server_response) {
+                    try{
+                        $algoresponse = $this->buildAlgoResponse($server_response);
+                    }catch(\Exception $e) {
+                        //these are hard to see otherwise... lets help folks out.
+                        echo "Internal error in promise then: ".$e->getMessage();
+                        echo $e->getTraceAsString();
+                        throw new \Algorithmia\AlgoException($e->getMessage());
+                    }
+
+                    return $algoresponse;
+                },
+                function($exception){
+                    throw new \Algorithmia\AlgoException($exception->getMessage());
+                });
         }
 
+        return $this->buildAlgoResponse($response);
+    }
+
+    //builds the algoresponse from the response object
+    public function buildAlgoResponse($response) {
         $str_result = $response->getBody()->getContents();
 
         if($this->getOptions()['output'] == 'raw')
         {
             return $str_result; //if they've requested raw output, return early.
         }
-        
+
         $obj_result = json_decode($str_result);
+
+        if(!$obj_result)
+            return $str_result;
 
         if(property_exists($obj_result, 'error'))
         {
             throw new AlgoException($obj_result->error->message);
+        }
+
+        if(!property_exists($obj_result, 'result')) //this will be the case for output=void
+        {
+            return $obj_result;
         }
 
         //convert results if they are binary
@@ -190,10 +219,8 @@ class Client {
                 throw new \Exception('base64_decode failed to decode the result');
             }
         }
-
-        $algo_response = new AlgoResponse($response, $obj_result);
-
-        return $algo_response;
+        
+        return new AlgoResponse($response, $obj_result);
     }
 
     /**

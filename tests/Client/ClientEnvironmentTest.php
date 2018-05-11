@@ -21,7 +21,7 @@ final class ClientEnvironmentTest extends BaseTest
     {
         $client = new Algorithmia\Client(self::NOT_MY_API, self::NOT_BASEPATH);
 
-        //all are defaults
+        //all are intentionally set
         $this->assertInstanceOf(Algorithmia\Client::class, $client);
         $this->assertEquals($client->getOptions()['key'], self::NOT_MY_API);
         $this->assertEquals($client->getOptions()['server'], self::NOT_BASEPATH);
@@ -35,6 +35,7 @@ final class ClientEnvironmentTest extends BaseTest
 
         $client = new Algorithmia\Client(); //no params sent
 
+        //all are from environment vars
         $this->assertInstanceOf(Algorithmia\Client::class, $client);
         $this->assertEquals($client->getOptions()['key'], self::NOT_MY_API);
         $this->assertEquals($client->getOptions()['server'], self::NOT_BASEPATH);

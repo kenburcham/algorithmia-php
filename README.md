@@ -49,6 +49,27 @@ echo $response->metadata->content_type;  # text
 echo $response->metadata->duration; # 0.0002127 (just for example; this will vary, of course)
 ```
 
+You can also call algorithms asynchronously and get back a promise:
+
+```PHP
+$algo = $client->algo('demo/Hello/0.1.1');
+$async_promise = $algo->pipeAsync("HAL 9001");
+$promise = $async_promise->then(function($server_response){
+    //do something when the server returns a response
+    return $server_response;
+});
+$response = $promise->wait(); //now lets wait for it to finish
+echo $response->result;   #Hello HAL 9001
+
+//or all at once... but generally you're wanting to do something when the response comes back like above...
+$promise = $algo->pipeAsync("HAL 9001");
+$response = $promise->wait(); //now lets wait for it to finish
+echo $response->result;   #Hello HAL 9001
+
+```
+
+
+
 ### JSON input/output
 
 Call an algorithm with JSON input by passing in any object that can be serialized to JSON such as strings or arrays. 

@@ -7,7 +7,7 @@ final class ClientTest extends BaseTest
     const ALGORITHM_ECHO = "util/Echo/0.2.1";
     const ALGORITHM_HELLO = "demo/Hello/0.1.0";
     const ALGORITHM_SUMMARIZER = "nlp/Summarizer/0.1.7";
-
+/*
     public function testCanGetClient()
     {
         $client = $this->getClient();
@@ -95,7 +95,7 @@ final class ClientTest extends BaseTest
         
         $client->setOptions(['timeout' => 120]); //reset to the default
     }
-
+*/
     public function testClientConstructorBaseURL() {
 
         $nonexistent_server = "https://aaaapppi.algorithmia.com/api/v777/algo/";
@@ -119,10 +119,15 @@ final class ClientTest extends BaseTest
 
         $string_to_test = "HAL 9001";
 
-        $client->setOptions(['output' => 'void']); //indicates we should not wait for a result (returns a promise instead of result)
-        $response = $algo->pipe($string_to_test);
+        $client->setOptions(['output' => 'void']); //indicates we should not wait for a result (returns a promise with request id upon resolve instead of result)
+        $response = $algo->pipe($string_to_test); //or pipeAsync does the same thing
 
         $this->assertInstanceOf(\GuzzleHttp\Promise\Promise::class, $response);   
+
+        $response->then(function($obj){
+            $this->assertTrue(property_exists($obj, 'request_id')); 
+            //echo $obj->request_id;    //gives you the algo request id handle
+        });
     }
 
     public function testSetOptionOutputRaw()
@@ -134,5 +139,38 @@ final class ClientTest extends BaseTest
 
         $this->assertEquals('{"something":"something else"}', $response);   
     }
+
+    /** this is an important one! */
+    public function testAsyncPipe()
+    {
+        $client = $this->getClient();
+        $algo = $client->algo(self::ALGORITHM_HELLO);
+
+        $string_to_test = "HAL 9001";
+
+        $response = $algo->pipeAsync($string_to_test);
+        $this->assertInstanceOf(\GuzzleHttp\Promise\Promise::class, $response);   
+
+        //optional: you can chain "then" function if you want to do something when the request comes back
+        $promise = $response->then(function($algoresponse){
+            //do something
+            return $algoresponse;
+        });
+
+        //but you could just comment out above and do:
+        // $algoresponse = $response->wait();  
+            //  you can do this because $response is already a promise that will return an algoresponse
+ 
+        $this->assertInstanceOf(\GuzzleHttp\Promise\Promise::class, $promise);   
+
+        $algoresponse = $promise->wait(); //ok now waith for things to finish...
+        //echo $algoresponse->result;
+
+        $this->assertInstanceOf(\Algorithmia\AlgoResponse::class, $algoresponse);
+        $this->assertEquals($algoresponse->result, "Hello HAL 9001"); //HAL 9001
+        
+    }
+    
+
 
 }
