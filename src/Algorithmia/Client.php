@@ -30,11 +30,16 @@ class Client {
      * @param string $in_key 
      * @param string $in_baseurl URL for the server: "https://api.algorithmia.com"
      */
-    public function __construct($in_key, $in_baseurl=null) {
-        $this->key = preg_replace('/\n/','',$in_key);
+    public function __construct($in_key=null, $in_baseurl=null) {
 
-        if(!is_null($in_baseurl))
-            $this->api_address = $this->getDomainFromURL($in_baseurl);
+        $api_key = (!is_null($in_key)) ? $in_key : getenv('ALGORITHMIA_API_KEY');
+        $baseurl = (!is_null($in_baseurl)) ? $in_baseurl : getenv('ALGORITHMIA_API');
+
+        if($api_key)
+            $this->key = preg_replace('/\n/','',$api_key);
+
+        if($baseurl)
+            $this->api_address = $this->getDomainFromURL($baseurl);
 
         $this->http_client = new HttpClient(['server' => $this->api_address, 'key' => $this->key]);
     }

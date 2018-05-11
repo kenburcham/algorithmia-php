@@ -5,7 +5,7 @@ PHP client library for accessing the Algorithmia API
 For API documentation, see the [PHPDocs](https://algorithmia.com/docs/lang/PHP)
 
 ## Installation
-Packaging is coming soon, but for now you can clone this repository and copy the Algorithmia folder into your project and point to it with your autoloader or add "use Algorithmia;" statements directly. You'll also need to run "composer update" to get the packages the client needs.
+Clone this repository and copy the Algorithmia folder into your project and point to it with your autoloader or add "use Algorithmia;" statements directly. You'll also need to run "composer update" to get the packages the client needs.
 
 ## Authentication
 First, create an Algorithmia client and authenticate with your API key. You must replace YOUR_API_KEY with your personal key:
@@ -14,6 +14,17 @@ First, create an Algorithmia client and authenticate with your API key. You must
 use Algorithmia;
 
 $client = Algorithmia::client('YOUR_API_KEY');
+```
+
+Note that you can also set the api key as an environment variable:
+
+```php
+//run the script with with:
+php -dALGORITHMIA_API_KEY=ABC12345567483 myAI.php
+
+//and then in myAI.php
+$client = Algorithmia::client();
+
 ```
 
 Now you're ready to call AI algorithms from your code. 

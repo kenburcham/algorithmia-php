@@ -1,7 +1,5 @@
 <?php
 
-use GuzzleHttp\ClientInterface;
-
 class Algorithmia
 {
 
