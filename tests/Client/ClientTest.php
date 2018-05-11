@@ -69,10 +69,10 @@ final class ClientTest extends BaseTest
 
         $string_to_test = "PHP-Test";
 
-        $response = $algo->setOptions(['timeout' => 3.14])->pipe($string_to_test);
+        $response = $algo->setOptions(['timeout' => 3])->pipe($string_to_test);
 
         $this->assertEquals($response->result, $string_to_test);
-        $this->assertEquals(3.14, $client->getOptions()['timeout']);
+        $this->assertEquals(3, $client->getOptions()['timeout']);
 
         $client->setOptions(['timeout' => 120]); //reset to the default
 
@@ -140,7 +140,7 @@ final class ClientTest extends BaseTest
         $this->assertEquals('{"something":"something else"}', $response);   
     }
 
-    /** this is an important one! */
+    // this is an important one! 
     public function testAsyncPipe()
     {
         $client = $this->getClient();
@@ -170,7 +170,4 @@ final class ClientTest extends BaseTest
         $this->assertEquals($algoresponse->result, "Hello HAL 9001"); //HAL 9001
         
     }
-    
-
-
 }
