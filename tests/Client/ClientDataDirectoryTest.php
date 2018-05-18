@@ -152,4 +152,65 @@ final class ClientDataDirectoryTest extends BaseTest
 
     }
 
+    public function testFilesReturnsDataFiles() {
+        $client = $this->getClient();
+
+        $foo = $client->dir("data://.my/foo");
+
+        if(!$foo->exists()){
+            $foo->create();
+        }
+
+        $new_file = $client->file("data://.my/foo/Optimus_Prime.txt");
+        $new_file->put("Leader of the Autobots");
+        $this->assertEquals(200, $new_file->getResponse()->getStatusCode());
+        $this->assertInstanceOf(\Algorithmia\DataFile::class, $new_file);    
+        
+        foreach($foo->files() as $file){
+
+            $this->assertInstanceOf(\Algorithmia\DataFile::class, $file);    
+            $this->assertEquals(".my/foo/Optimus_Prime.txt",$file->getPath()); //a dataobject property getter method
+            $this->assertEquals("Optimus_Prime.txt", $file->getFilename()); //a datafile property getter
+            $this->assertEquals("Optimus_Prime.txt", $file->getName()); //a datafile property getter - can use either
+
+            $file->delete(); //datafile method
+        }
+
+        $this->assertFalse($new_file->exists()); //it should be deleted
+
+        $foo->delete(); 
+    }
+
+    public function testFoldersReturnsDataDirectories() {
+        $client = $this->getClient();
+
+        //create a foo
+        $foo = $client->dir("data://.my/foo");
+
+        if(!$foo->exists()){
+            $foo->create();
+        }
+
+        //now lets look for foo in the root
+        $root = $client->dir("data://.my");
+        $this->assertTrue($root->exists());
+
+        $foundfoo = false;
+
+        foreach($root->folders() as $folder){
+            $this->assertInstanceOf(\Algorithmia\DataDirectory::class, $folder);    
+
+            //looking for foo
+            if($folder->getName() == "foo")
+            {
+                $foundfoo = $folder; //hooray!
+            }
+        }
+
+        $this->assertTrue($foundfoo != false); 
+        $this->assertEquals($foundfoo->getPath(),".my/foo");
+
+        $foo->delete(); 
+    }
+
 }

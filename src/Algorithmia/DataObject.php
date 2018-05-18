@@ -9,7 +9,7 @@ class DataObject {
     protected $dataUrl;
     protected $connector;
     protected $path;
-    protected $name; 
+    protected $name;
     protected $parent;
 
     protected $acl;
@@ -42,6 +42,50 @@ class DataObject {
         if(!DataConnectors::isValidConnector($this->connector)){
             throw new AlgoException("connection type is invalid: "+ $this->connector);
         }
+    }
+
+    /**
+     * convert an incoming array of stdClass files to bona fide DataFile objects
+     */
+    public function asDataFiles(array $in_files) {
+
+        $data_files = array();
+
+        foreach ($in_files as $file) {
+            if(property_exists($file, 'filename')) {
+                
+                $data_file = new DataFile($this->getDataUrl().'/'.$file->filename, $this->client);
+
+                foreach (get_object_vars($file) as $key => $value) {
+                    $data_file->$key = $value;
+                }
+                array_push($data_files, $data_file);
+            }
+        }
+
+        return $data_files;
+    }
+
+    /**
+     * convert an incoming array of stdClass directories to bona fide DataDirectory objects
+     */
+    public function asDataDirectories(array $in_dirs) {
+
+        $data_dirs = array();
+
+        foreach ($in_dirs as $dir){
+            if(property_exists($dir, 'name')) {
+
+                $data_dir = new DataDirectory($this->getDataUrl().'/'.$dir->name, $this->client);
+
+                foreach (get_object_vars($dir) as $key => $value) {
+                    $data_dir->$key = $value;
+                }
+                array_push($data_dirs, $data_dir);
+            }
+        }
+
+        return $data_dirs;
     }
 
     /**

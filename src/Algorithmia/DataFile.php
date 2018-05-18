@@ -13,7 +13,14 @@ class DataFile extends DataObject {
     public $content_type;
 
     public function getFile(){
-        $this->response = $this->client->doFileGet($this->connector, $this->path);
+        try{
+            $this->response = $this->client->doFileGet($this->connector, $this->path);
+        }
+        catch(\Exception $e)
+        {
+            $error = json_decode($e->getResponse()->getBody()->getContents())->error;
+            throw new AlgoException($error->message);
+        }
 
         $this->result = $this->response->getBody()->getContents();
         $this->last_modified = $this->response->getHeaders()['Content-Type'][0];
@@ -25,6 +32,10 @@ class DataFile extends DataObject {
 
     public function getLastModified(){
         return $this->last_modified;
+    }
+
+    public function getFilename() {
+        return $this->name;
     }
 
     public function getSize(){
@@ -48,7 +59,14 @@ class DataFile extends DataObject {
     }
 
     public function put($in_input){
-        $this->response = $this->client->doDataPut($this->connector, $this->path, $in_input);
+        try{    
+            $this->response = $this->client->doDataPut($this->connector, $this->path, $in_input);
+        }
+        catch(\Exception $e)
+        {
+            $error = json_decode($e->getResponse()->getBody()->getContents())->error;
+            throw new AlgoException($error->message);
+        }
         return $this->response;
     }
 
@@ -58,12 +76,27 @@ class DataFile extends DataObject {
 
         $bin_file = file_get_contents($in_filepath);
 
-        $this->response = $this->client->doDataPut($this->connector, $this->path, $bin_file);
+        try{
+            $this->response = $this->client->doDataPut($this->connector, $this->path, $bin_file);
+        }
+        catch(\Exception $e)
+        {
+            $error = json_decode($e->getResponse()->getBody()->getContents())->error;
+            throw new AlgoException($error->message);
+        }
         return $this->response;
     }
 
     public function putJson($in_input){
-        $this->response = $this->client->doDataPut($this->connector, $this->path, json_encode($in_input));
+        try{
+            $this->response = $this->client->doDataPut($this->connector, $this->path, json_encode($in_input));
+        }
+        catch(\Exception $e)
+        {
+            $error = json_decode($e->getResponse()->getBody()->getContents())->error;
+            throw new AlgoException($error->message);
+        }
+
         return $this->response;
     }
 
@@ -76,6 +109,7 @@ class DataFile extends DataObject {
             $error = json_decode($e->getResponse()->getBody()->getContents())->error;
             throw new AlgoException($error->message);
         }
+
         return $this->response;
     }
 

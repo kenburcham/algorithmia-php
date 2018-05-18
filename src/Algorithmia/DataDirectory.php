@@ -29,11 +29,11 @@ class DataDirectory extends DataObject {
         }
 
         if(property_exists($obj_result, 'files')){
-            $this->files = array_merge($this->files, $obj_result->files);
+            $this->files = array_merge($this->files, $this->asDataFiles($obj_result->files));
         }
 
         if(property_exists($obj_result, 'folders')){
-            $this->folders = array_merge($this->folders, $obj_result->folders);
+            $this->folders = array_merge($this->folders, $this->asDataDirectories($obj_result->folders));
         }
 
         if(property_exists($obj_result, 'marker')){
@@ -79,14 +79,22 @@ class DataDirectory extends DataObject {
 
     public function containsFolder(string $in_name){
 
-        $containsFolder = false;
-
         foreach($this->folders() as $folder){
             if($folder->name == $in_name )
-                $containsFolder = true;
+                return true;
         }
 
-        return $containsFolder;
+        return false;
+    }
+
+    public function containsFile(string $in_name){
+
+        foreach($this->files() as $file){
+            if($file->name == $in_name )
+                return true;
+        }
+
+        return false;
     }
 
     public function folders(){
