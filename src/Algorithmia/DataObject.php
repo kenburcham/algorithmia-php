@@ -40,7 +40,7 @@ class DataObject {
             $this->parent = $name_parts['parent'];
 
         if(!DataConnectors::isValidConnector($this->connector)){
-            throw new AlgoException("connection type is invalid: "+ $this->connector);
+            throw new AlgoException("connection type is invalid: " . $this->connector);
         }
     }
 
