@@ -70,13 +70,22 @@ class HttpClient {
 
     public function get(string $in_url, string $in_content_type){
         $client = $this->getClientForType($in_content_type);
-        $promise = $client->getAsync($in_url, $this->getQueryParamArray());
-        
-        if($this->options['output']=='void'){
-            return $promise;
-        }
+       
+        try
+        {
+            $promise = $client->getAsync($in_url, $this->getQueryParamArray());
 
-        return $promise->wait();
+            if($this->options['output']=='void'){
+                return $promise;
+            }
+    
+            return $promise->wait();
+    
+        }
+        catch(\Exception $e)
+        {
+            throw new AlgoException($this->extractExceptionMessage($e));
+        }
     }
 
     /**
@@ -89,7 +98,15 @@ class HttpClient {
         $client = $this->getClientForType($in_content_type);
         $body_name = $this->getBodyNameForType($in_content_type);
         
-        return $client->put($in_url, $this->getQueryParamArray([$body_name => $in_input]));
+        try
+        {
+            return $client->put($in_url, $this->getQueryParamArray([$body_name => $in_input]));
+        }
+        catch(\Exception $e)
+        {
+            throw new AlgoException($this->extractExceptionMessage($e));
+        }
+
     }
 
     /**
@@ -102,20 +119,31 @@ class HttpClient {
         $client = $this->getClientForType($in_content_type);
         $body_name = $this->getBodyNameForType($in_content_type);
         
-        $promise = $client->postAsync($in_url, $this->getQueryParamArray([$body_name => $in_input]));
-
-        if($this->options['output']=='void' || $in_async){
-            return $promise;
+        try{
+            $promise = $client->postAsync($in_url, $this->getQueryParamArray([$body_name => $in_input]));
+            
+            if($this->options['output']=='void' || $in_async){
+                return $promise;
+            }
+    
+            return $promise->wait();
         }
-
-        return $promise->wait();
-
-        
+        catch(\Exception $e)
+        {
+            throw new AlgoException($this->extractExceptionMessage($e));
+        }
     }
 
     public function delete(string $in_url, string $in_content_type) {
         $client = $this->getClientForType($in_content_type);
-        return $client->delete($in_url);
+
+        try{
+            return $client->delete($in_url);
+        }
+        catch(\Exception $e)
+        {
+            throw new AlgoException($this->extractExceptionMessage($e));
+        }
     }
 
     public function getClientForType(string $in_content_type) {
@@ -204,4 +232,15 @@ class HttpClient {
         return $query_param_array;
     }
 
+    private function extractExceptionMessage(\GuzzleHttp\Exception\RequestException $e) {
+        if(is_null($e->getResponse()))
+        {
+            //var_dump($e);
+            return $e->getMessage();
+        }
+        else{
+            return json_decode( $e->getResponse()->getBody()->getContents() )->error->message;
+        }
+            
+    }
 }

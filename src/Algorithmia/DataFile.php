@@ -13,14 +13,8 @@ class DataFile extends DataObject {
     public $content_type;
 
     public function getFile(){
-        try{
-            $this->response = $this->client->doFileGet($this->connector, $this->path);
-        }
-        catch(\Exception $e)
-        {
-            $error = json_decode($e->getResponse()->getBody()->getContents())->error;
-            throw new AlgoException($error->message);
-        }
+
+        $this->response = $this->client->doFileGet($this->connector, $this->path);
 
         $this->result = $this->response->getBody()->getContents();
         $this->last_modified = $this->response->getHeaders()['Content-Type'][0];
@@ -59,14 +53,7 @@ class DataFile extends DataObject {
     }
 
     public function put($in_input){
-        try{    
-            $this->response = $this->client->doDataPut($this->connector, $this->path, $in_input);
-        }
-        catch(\Exception $e)
-        {
-            $error = json_decode($e->getResponse()->getBody()->getContents())->error;
-            throw new AlgoException($error->message);
-        }
+        $this->response = $this->client->doDataPut($this->connector, $this->path, $in_input);
         return $this->response;
     }
 
@@ -76,40 +63,17 @@ class DataFile extends DataObject {
 
         $bin_file = file_get_contents($in_filepath);
 
-        try{
-            $this->response = $this->client->doDataPut($this->connector, $this->path, $bin_file);
-        }
-        catch(\Exception $e)
-        {
-            $error = json_decode($e->getResponse()->getBody()->getContents())->error;
-            throw new AlgoException($error->message);
-        }
+        $this->response = $this->client->doDataPut($this->connector, $this->path, $bin_file);
         return $this->response;
     }
 
     public function putJson($in_input){
-        try{
-            $this->response = $this->client->doDataPut($this->connector, $this->path, json_encode($in_input));
-        }
-        catch(\Exception $e)
-        {
-            $error = json_decode($e->getResponse()->getBody()->getContents())->error;
-            throw new AlgoException($error->message);
-        }
-
+        $this->response = $this->client->doDataPut($this->connector, $this->path, json_encode($in_input));
         return $this->response;
     }
 
     public function delete(){
-        try{
-            $this->response = $this->client->doDataDelete($this->connector, $this->path);
-        }
-        catch(\Exception $e)
-        {
-            $error = json_decode($e->getResponse()->getBody()->getContents())->error;
-            throw new AlgoException($error->message);
-        }
-
+        $this->response = $this->client->doDataDelete($this->connector, $this->path);
         return $this->response;
     }
 

@@ -55,25 +55,14 @@ class DataDirectory extends DataObject {
     public function create($in_acl = ACL::DEFAULT)
     {
         $input = ["name" => $this->name, "acl" => ACL::getACLJson($in_acl)];
-
         $this->response = $this->client->doDataPost($this->connector, $this->parent, $input);
-
         return $this;
     }
 
     public function delete($in_force = false)
     {
         $path_force = ($in_force) ? $this->path . "?force=true" : $this->path;
-
-        try {
-            $this->response = $this->client->doDataDelete($this->connector, $path_force);
-        }
-        catch(\Exception $e)
-        {
-            $error = json_decode($e->getResponse()->getBody()->getContents())->error;
-            throw new AlgoException($error->message);
-        }
-        
+        $this->response = $this->client->doDataDelete($this->connector, $path_force);
         return $this;
     }
 

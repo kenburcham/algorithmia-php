@@ -87,7 +87,7 @@ final class ClientTest extends BaseTest
 
         $string_to_test = "A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution. Digital signatures provide part of the solution, but the main benefits are lost if a trusted third party is still required to prevent double-spending. We propose a solution to the double-spending problem using a peer-to-peer network. The network timestamps transactions by hashing them into an ongoing chain of hash-based proof-of-work, forming a record that cannot be changed without redoing the proof-of-work. The longest chain not only serves as proof of the sequence of events witnessed, but proof that it came from the largest pool of CPU power. As long as a majority of CPU power is controlled by nodes that are not cooperating to attack the network, they'll generate the longest chain and outpace attackers. The network itself requires minimal structure. Messages are broadcast on a best effort basis, and nodes can leave and rejoin the network at will, accepting the longest proof-of-work chain as proof of what happened while they were gone.";
         
-        $this->expectException(\GuzzleHttp\Exception\RequestException::class);
+        $this->expectException(\Algorithmia\AlgoException::class);
         
         //this will almost certainly fail (causing the test to succeed) 
         // because it needs more than .05 second to finish...
@@ -108,7 +108,7 @@ final class ClientTest extends BaseTest
 
         $string_to_test = "A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution. Digital signatures provide part of the solution, but the main benefits are lost if a trusted third party is still required to prevent double-spending. We propose a solution to the double-spending problem using a peer-to-peer network. The network timestamps transactions by hashing them into an ongoing chain of hash-based proof-of-work, forming a record that cannot be changed without redoing the proof-of-work. The longest chain not only serves as proof of the sequence of events witnessed, but proof that it came from the largest pool of CPU power. As long as a majority of CPU power is controlled by nodes that are not cooperating to attack the network, they'll generate the longest chain and outpace attackers. The network itself requires minimal structure. Messages are broadcast on a best effort basis, and nodes can leave and rejoin the network at will, accepting the longest proof-of-work chain as proof of what happened while they were gone.";
         
-        $this->expectException(\GuzzleHttp\Exception\RequestException::class);
+        $this->expectException(\Algorithmia\AlgoException::class);
         $response = $algo->pipe($string_to_test); //should fail because the server doesn't exist.    
     }
 
@@ -170,4 +170,16 @@ final class ClientTest extends BaseTest
         $this->assertEquals($algoresponse->result, "Hello HAL 9001"); //HAL 9001
         
     }
+
+    public function testAlgoException(){
+        $client = $this->getClient();
+        
+        $algo = $client->algo('demo/HelloX/0.1.0');
+
+        $this->expectException(\Algorithmia\AlgoException::class);       
+        $result = $algo->pipe("HelloX!");
+
+    }
+
+
 }

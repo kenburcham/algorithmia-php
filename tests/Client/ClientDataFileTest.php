@@ -48,7 +48,6 @@ final class ClientDataFileTest extends BaseTest
         $file = $client->file(self::FOOFILE);
 
         $this->assertFalse($file->exists());
-        $this->assertEquals(404, $file->getResponse()->getStatusCode());
 
         $bin_file = $this->testDir . '/'. self::EXAMPLE_FILE;
 
