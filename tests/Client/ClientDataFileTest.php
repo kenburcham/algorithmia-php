@@ -51,18 +51,18 @@ final class ClientDataFileTest extends BaseTest
 
         $bin_file = $this->testDir . '/'. self::EXAMPLE_FILE;
 
-        $response = $client->file(self::FOOFILE)->putFile($bin_file);
+        $file = $client->file(self::FOOFILE)->putFile($bin_file);
 
         //did it work? two ways to tell... this is fast
-        $this->assertEquals($response->getStatusCode(), 200);
+        $this->assertEquals($file->response->getStatusCode(), 200);
         
         //this is slow, but verifies via server call.
         $this->assertTrue($file->exists());
 
         //now lets clean up
-        $response = $file->delete();
-        $this->assertEquals("OK", $file->getResponse()->getReasonPhrase());
-        $this->assertEquals(200, $file->getResponse()->getStatusCode());
+        $file = $file->delete();
+        $this->assertEquals("OK", $file->response->getReasonPhrase());
+        $this->assertEquals(200, $file->response->getStatusCode());
 
         $this->assertFalse($client->file(self::FOOFILE)->exists());
     }
@@ -70,10 +70,10 @@ final class ClientDataFileTest extends BaseTest
     public function testPutGetDeleteJsonFile(){
         $client = $this->getClient();
 
-        $response = $client->file("data://.my/foo/Optimus_Prime.json")->putJson(["faction" => "Autobots"]);
-        $this->assertEquals(200, $response->getStatusCode());
+        $file = $client->file("data://.my/foo/Optimus_Prime.json")->putJson(["faction" => "Autobots"]);
+        $this->assertEquals(200, $file->response->getStatusCode());
 
-        $file_json = $client->file("data://.my/foo/Optimus_Prime.json")->getFile()->getJson();
+        $file_json = $client->file("data://.my/foo/Optimus_Prime.json")->getJson();
 
         $this->assertEquals("Autobots",$file_json->faction);
 
@@ -85,9 +85,9 @@ final class ClientDataFileTest extends BaseTest
 
         $file = $client->file("data://.my/foo/Optimus_Prime.txt");
         $file->put("Leader of the Autobots");
-        $this->assertEquals(200, $file->getResponse()->getStatusCode());
+        $this->assertEquals(200, $file->response->getStatusCode());
 
-        $file_string_from_server = $client->file("data://.my/foo/Optimus_Prime.txt")->getFile()->getString();
+        $file_string_from_server = $client->file("data://.my/foo/Optimus_Prime.txt")->getString();
 
         $this->assertEquals("Leader of the Autobots",$file_string_from_server);
 
@@ -99,11 +99,11 @@ final class ClientDataFileTest extends BaseTest
         $client = $this->getClient();
         $bin_file = $this->testDir . '/'. self::EXAMPLE_BIN_FILE;
 
-        $response = $client->file("data://.my/foo/opencv_test.png")->putFile($bin_file);
-        $this->assertEquals(200, $response->getStatusCode());
+        $file = $client->file("data://.my/foo/opencv_test.png")->putFile($bin_file);
+        $this->assertEquals(200, $file->response->getStatusCode());
 
-        $file = $client->file("data://.my/foo/opencv_test.png")->getFile();
-        $this->assertEquals(200, $file->getResponse()->getStatusCode());
+        $file = $client->file("data://.my/foo/opencv_test.png")->getDataFile();
+        $this->assertEquals(200, $file->response->getStatusCode());
         $this->assertEquals("image/png", $file->getContentType());
         $this->assertEquals(275091 , $file->getSize());
 
@@ -114,17 +114,66 @@ final class ClientDataFileTest extends BaseTest
         $this->assertTrue(file_exists($local_file));
         unlink($local_file);
 
-        $response = $client->file("data://.my/foo/opencv_test.png")->delete();
-        $this->assertEquals(200, $response->getStatusCode());
+        $file = $client->file("data://.my/foo/opencv_test.png")->delete();
+        $this->assertEquals(200, $file->response->getStatusCode());
     }
 
     //save a file using just the filepath. use the filename as the algo file.
     public function testDirPutFile(){
         $client = $this->getClient();
         $foo_dir = $client->dir(self::FOODIR);
-        $response = $foo_dir->putFile($this->testDir . '/'. self::EXAMPLE_FILE); // like: /testdir/test_example.txt
-        $this->assertEquals(200, $response->getStatusCode());
+        $file = $foo_dir->putFile($this->testDir . '/'. self::EXAMPLE_FILE); // like: /testdir/test_example.txt
+        $this->assertEquals(200, $file->response->getStatusCode());
         $client->file(self::FOODIR.'/'.self::EXAMPLE_FILE)->delete();
     }
+
+    //now this actually gets a file handle... a temp file will be created via stream
+    public function testGetFileSystemFile(){
+        $client = $this->getClient();
+        $foo_dir = $client->dir(self::FOODIR);
+        $file = $foo_dir->putFile($this->testDir . '/'. self::EXAMPLE_FILE); // like: /testdir/test_example.txt
+        $file->put("Leader of the Autobots");
+        $this->assertEquals(200, $file->response->getStatusCode());
+
+        //write the file to a temp dir and get the path to this file on the filesystem
+        $my_file_path = $file->getFile();
+
+        //file should exist now!
+        $this->assertTrue(file_exists($my_file_path));
+
+        //what is in the contents of the file? should be what we saved!
+        $this->assertEquals("Leader of the Autobots", file_get_contents($my_file_path));
+        
+        //delete the file and the local file
+        $file->delete();
+        unlink($my_file_path);
+    }
+
+    //you can also specify the filesink that you want the response written to. this is handled with streams
+    // so should work for very big files, too.
+    public function testGetSpecifiedFileSystemFile(){
+        $client = $this->getClient();
+        $foo_dir = $client->dir(self::FOODIR);
+        $file = $foo_dir->putFile($this->testDir . '/'. self::EXAMPLE_FILE); // like: /testdir/test_example.txt
+        $file->put("Leader of the Autobots");
+        $this->assertEquals(200, $file->response->getStatusCode());
+
+        $my_filesink = $this->testDir . '/my_filesink.txt';
+
+        //write the file to a SPECIFIED dir and get the path to this file on the filesystem
+        $my_file_path = $file->getFile($my_filesink);
+
+        //file should exist now!
+        $this->assertTrue(file_exists($my_file_path));
+
+        //what is in the contents of the file? should be what we saved!
+        $this->assertEquals("Leader of the Autobots", file_get_contents($my_file_path));
+        
+        //delete the file and the local file
+        $file->delete();
+        unlink($my_file_path);
+    }
+
+
 
 }

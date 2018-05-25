@@ -36,7 +36,8 @@ class HttpClient {
         'key' => null,
         'debug' => self::DEBUG,
         'stdout' => null,
-        'output' => null
+        'output' => null,
+        'sink' => null
     );
 
     /**
@@ -213,6 +214,10 @@ class HttpClient {
     private function getQueryParamArray($in_array = array()){
 
         $common_params = array('debug' => $this->options['debug'], 'timeout' => $this->options['timeout']);
+
+        //allow for direct streaming to particular filename if they provide the filesink they want to use
+        if($this->options['sink'])
+            $common_params['sink'] = $this->options['sink'];
 
         $query_param_array = array_merge($common_params, $in_array);
         

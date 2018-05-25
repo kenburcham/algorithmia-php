@@ -14,7 +14,7 @@ class DataObject {
 
     protected $acl;
 
-    protected $response;
+    public $response;
 
 
     /**
