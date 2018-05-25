@@ -5,13 +5,13 @@ PHP client library for accessing the Algorithmia API
 For API documentation, see the [PHPDocs](https://algorithmia.com/docs/lang/PHP)
 
 ## Installation
-Clone this repository and copy the Algorithmia folder into your project and point to it with your autoloader or add "use Algorithmia;" statements directly. You'll also need to run "composer update" to get the packages the client needs.
+Clone this repository and copy the Algorithmia folder into your project. You'll also need to run "composer update" to get the packages the client needs.
 
 ## Authentication
 First, create an Algorithmia client and authenticate with your API key. You must replace YOUR_API_KEY with your personal key:
 
 ```PHP
-use Algorithmia;
+include "vendor/autoload.php";
 
 $client = Algorithmia::client('YOUR_API_KEY');
 ```
@@ -195,13 +195,13 @@ $client->file("data://.my/foo/my_new_file.txt")->put("/path/to/thefile.txt");
 $foo->file("sample.txt")->put("sample text information"); //write a new "sample.txt" in "foo" that has this text
 
 //upload a binary file with a different name
-$response = $client->file("data://.my/foo/binary_test.png")->putFile('/path/to/binary/file.png');
-if($response->getStatusCode() !== 200) {...}; //you can also check the result of your action
+$file = $client->file("data://.my/foo/binary_test.png")->putFile('/path/to/binary/file.png');
+if($file->response->getStatusCode() !== 200) {...}; //you can also check the result of your action
 
 
 ```
 
-Note: you can instantiate a `DataFile` by either `$client->file(path+filename)` or `$client->dir(path)->file(filename)`
+Note: you can also instantiate a `DataFile` by either `$client->file('/path/to/file')` or `$client->dir('path')->file('filename')`
 
 
 ### Download contents of file
@@ -210,11 +210,16 @@ Download files by calling `getString`, `getBytes`, `getJson`, or `getFile` on a 
 
 ```PHP
 $foo_dir = $client->dir("data://.my/foo");
-$sampleText = $foo_dir->file("sample.txt")->getString();  # String object
-$binaryContent = $foo_dir->file("binary_file.jpg")->getBytes();  # Binary data
-$jsonObject = $foo_dir->file("myfile.json")->getJson(); #Json object
-$tempFile = $foo_dir->file("myfile.csv")->getFile();   # Open file descriptor
+$file_content_text = $foo_dir->file("sample.txt")->getString();  # String object
+$binary_content = $foo_dir->file("binary_file.jpg")->getBytes();  # Binary data
+$json_object = $foo_dir->file("myfile.json")->getJson(); #Json object
+$temp_file_name = $foo_dir->file("myfile.csv")->getFile();   # Download file to a temp file on the filesystem
+$specified_file_name = $foo_dir->file("myfile.csv")->getFile('/path/to/file');   # Download file to a specified file location
+
+$file_contents = file_get_contents($temp_file_name); //read the contents of the temp file you downloaded
 ```
+
+Note: the `getFile()` method uses streams, so if you're getting large files, that's the way you'll want to do it to avoid memory issues.
 
 ### Delete files and directories
 
@@ -224,8 +229,9 @@ if it contains files or other directories.
 
 ```PHP
 $foo_dir = $client->dir("data://.my/foo");
-$foo_dir->file("sample.txt")->delete();
-$foo_dir->delete(true); // true implies force deleting the directory and its contents
+$foo_dir->file("sample.txt")->delete(); 
+$foo_dir->delete(); //will fail if the collection isn't empty
+$foo_dir->delete(true); // true forces deleting the directory and its contents
 ```
 
 
