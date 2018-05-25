@@ -116,7 +116,6 @@ class HttpClient {
      * @return httpresponse Object
      */
     public function post(string $in_url, $in_input, string $in_content_type, $in_async=false){
-
         $client = $this->getClientForType($in_content_type);
         $body_name = $this->getBodyNameForType($in_content_type);
         

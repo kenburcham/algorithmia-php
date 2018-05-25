@@ -4,7 +4,6 @@ namespace Algorithmia;
 
 class AlgoResponse {
     private $httpResponse;
-    public $json;
     public $result;
     public $metadata;
 

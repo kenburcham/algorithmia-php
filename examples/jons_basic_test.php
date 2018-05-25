@@ -13,6 +13,7 @@ $client->setOptions(['stdout' => true]);
 $algo = $client->algo($myUsername.'/HelloWorld');
 echo "\nHelloWorld: ".json_encode($algo->pipe("Foobar"));
 
+
 $client->setOptions(['timeout' => 55, 'stdout' => false]);
 
 $algo = $client->algo('opencv/SmartThumbnail/0.1');
