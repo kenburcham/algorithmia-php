@@ -78,6 +78,10 @@ final class ClientDataDirectoryTest extends BaseTest
     public function testCreateAndDeleteDataDirectory() {
         $client = $this->getClient();
 
+        $foo2 = $client->dir("data://.my/fooNew2");
+        if($foo2->exists())
+            $foo2->delete(true);
+
         $newdir = $client->dir("data://.my/fooNew2")->create();
 
         $this->assertInstanceOf(\Algorithmia\DataDirectory::class, $newdir);
@@ -114,8 +118,8 @@ final class ClientDataDirectoryTest extends BaseTest
         $newdir = $client->dir("data://.my/fooNew2")->create();
         $this->assertTrue($newdir->exists());
 
-        $response = $newdir->file("Secret.txt")->put("42");
-        $this->assertEquals(200, $response->getStatusCode());
+        $file = $newdir->file("Secret.txt")->put("42");
+        $this->assertEquals(200, $file->response->getStatusCode());
 
         //delete will fail because folder has contents
         //$this->expectException(\Algorithmia\AlgoException::class);
@@ -157,10 +161,12 @@ final class ClientDataDirectoryTest extends BaseTest
 
         $foo = $client->dir("data://.my/foo");
 
-        if(!$foo->exists()){
-            $foo->create();
+        if($foo->exists()){
+            $foo->delete(true);
         }
-
+        
+        $foo->create();
+        
         $new_file = $client->file("data://.my/foo/Optimus_Prime.txt");
         $new_file->put("Leader of the Autobots");
         $this->assertEquals(200, $new_file->getResponse()->getStatusCode());
@@ -210,7 +216,7 @@ final class ClientDataDirectoryTest extends BaseTest
         $this->assertTrue($foundfoo != false); 
         $this->assertEquals($foundfoo->getPath(),".my/foo");
 
-        $foo->delete(); 
+        $foo->delete(true); 
     }
 
 }
