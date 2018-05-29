@@ -5,7 +5,7 @@ include "../vendor/autoload.php";
 
 $client = Algorithmia::client('API_KEY');
 $localFile = "/home/ken/gitprojects/algorithmia-php/examples/assets/todo_list.txt";
-$dataDir = "data://.my/foo";
+$dataDir = "data://.my/foo_php";
 $testFile = $dataDir."/testFileDeleteme.txt";
 $missingFile = $dataDir."/thisFileDoesNotExist.txt";
 

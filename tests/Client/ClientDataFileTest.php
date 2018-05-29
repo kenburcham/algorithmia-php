@@ -5,8 +5,8 @@ declare(strict_types=1);
 final class ClientDataFileTest extends BaseTest
 {
     const HOME_DIR = "data://.my";
-    const FOODIR = "data://.my/foo";
-    const FOOFILE = "data://.my/foo/foofile.txt";
+    const FOODIR = "data://.my/foo_php";
+    const FOOFILE = "data://.my/foo_php/foofile.txt";
     const EXAMPLE_FILE = "test_example.txt"; //text file present in the test directory
     const EXAMPLE_BIN_FILE = "opencv_example.png"; //binary file in the test directory
     
@@ -14,8 +14,8 @@ final class ClientDataFileTest extends BaseTest
         $file = new Algorithmia\DataFile(self::FOOFILE);
 
         $this->assertEquals("foofile.txt",$file->getName());
-        $this->assertEquals(".my/foo/foofile.txt",$file->getPath());
-        $this->assertEquals(".my/foo",$file->getParent());
+        $this->assertEquals(".my/foo_php/foofile.txt",$file->getPath());
+        $this->assertEquals(".my/foo_php",$file->getParent());
         $this->assertEquals("data",$file->getConnector());
     }
 
@@ -70,24 +70,24 @@ final class ClientDataFileTest extends BaseTest
     public function testPutGetDeleteJsonFile(){
         $client = $this->getClient();
 
-        $file = $client->file("data://.my/foo/Optimus_Prime.json")->putJson(["faction" => "Autobots"]);
+        $file = $client->file("data://.my/foo_php/Optimus_Prime.json")->putJson(["faction" => "Autobots"]);
         $this->assertEquals(200, $file->response->getStatusCode());
 
-        $file_json = $client->file("data://.my/foo/Optimus_Prime.json")->getJson();
+        $file_json = $client->file("data://.my/foo_php/Optimus_Prime.json")->getJson();
 
         $this->assertEquals("Autobots",$file_json->faction);
 
-        $client->file("data://.my/foo/Optimus_Prime.json")->delete();
+        $client->file("data://.my/foo_php/Optimus_Prime.json")->delete();
     }
 
     public function testPutGetDeleteTextFile(){
         $client = $this->getClient();
 
-        $file = $client->file("data://.my/foo/Optimus_Prime.txt");
+        $file = $client->file("data://.my/foo_php/Optimus_Prime.txt");
         $file->put("Leader of the Autobots");
         $this->assertEquals(200, $file->response->getStatusCode());
 
-        $file_string_from_server = $client->file("data://.my/foo/Optimus_Prime.txt")->getString();
+        $file_string_from_server = $client->file("data://.my/foo_php/Optimus_Prime.txt")->getString();
 
         $this->assertEquals("Leader of the Autobots",$file_string_from_server);
 
@@ -99,10 +99,10 @@ final class ClientDataFileTest extends BaseTest
         $client = $this->getClient();
         $bin_file = $this->testDir . '/'. self::EXAMPLE_BIN_FILE;
 
-        $file = $client->file("data://.my/foo/opencv_test.png")->putFile($bin_file);
+        $file = $client->file("data://.my/foo_php/opencv_test.png")->putFile($bin_file);
         $this->assertEquals(200, $file->response->getStatusCode());
 
-        $file = $client->file("data://.my/foo/opencv_test.png")->getDataFile();
+        $file = $client->file("data://.my/foo_php/opencv_test.png")->getDataFile();
         $this->assertEquals(200, $file->response->getStatusCode());
         $this->assertEquals("image/png", $file->getContentType());
         $this->assertEquals(275091 , $file->getSize());
@@ -114,7 +114,7 @@ final class ClientDataFileTest extends BaseTest
         $this->assertTrue(file_exists($local_file));
         unlink($local_file);
 
-        $file = $client->file("data://.my/foo/opencv_test.png")->delete();
+        $file = $client->file("data://.my/foo_php/opencv_test.png")->delete();
         $this->assertEquals(200, $file->response->getStatusCode());
     }
 

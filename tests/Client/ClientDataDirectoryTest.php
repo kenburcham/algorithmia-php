@@ -30,10 +30,10 @@ final class ClientDataDirectoryTest extends BaseTest
 
 
     public function testConstructor(){
-        $dir = new Algorithmia\DataDirectory("data://.my/foo");
+        $dir = new Algorithmia\DataDirectory("data://.my/foo_php");
 
-        $this->assertEquals("foo",$dir->getName());
-        $this->assertEquals(".my/foo",$dir->getPath());
+        $this->assertEquals("foo_php",$dir->getName());
+        $this->assertEquals(".my/foo_php",$dir->getPath());
         $this->assertEquals(".my",$dir->getParent());
         $this->assertEquals("data",$dir->getConnector());
     }
@@ -54,25 +54,25 @@ final class ClientDataDirectoryTest extends BaseTest
 
     //this isn't supported as of yet in the actual API...
     public function testTwoLevelDirectory(){
-        $dir = new Algorithmia\DataDirectory("s3://.my/foo/morefoo");
+        $dir = new Algorithmia\DataDirectory("s3://.my/foo_php/morefoo");
 
         $this->assertEquals("morefoo",$dir->getName());
-        $this->assertEquals(".my/foo/morefoo",$dir->getPath());
-        $this->assertEquals(".my/foo", $dir->getParent());
+        $this->assertEquals(".my/foo_php/morefoo",$dir->getPath());
+        $this->assertEquals(".my/foo_php", $dir->getParent());
         $this->assertEquals("s3",$dir->getConnector());
     }
 
     public function testGetDataUrl(){
         $client = $this->getClient();
-        $dir = new Algorithmia\DataDirectory("s3://.my/foo", $client); //sending in the client now
-        $this->assertEquals("https://api.algorithmia.com/v1/connector/s3/.my/foo", $client->getDataUrl($dir->getConnector(),$dir->getPath()));
+        $dir = new Algorithmia\DataDirectory("s3://.my/foo_php", $client); //sending in the client now
+        $this->assertEquals("https://api.algorithmia.com/v1/connector/s3/.my/foo_php", $client->getDataUrl($dir->getConnector(),$dir->getPath()));
     }
 
     public function testGetDataAPIUrlAfterSetServer(){
         $client = $this->getClient();
         $client->setOptions(['server' => 'https://api2.algorithmia.com']);
-        $dir = new Algorithmia\DataDirectory("data://.my/foo", $client); 
-        $this->assertEquals("https://api2.algorithmia.com/v1/connector/data/.my/foo", $client->getDataUrl($dir->getConnector(),$dir->getPath()));
+        $dir = new Algorithmia\DataDirectory("data://.my/foo_php", $client); 
+        $this->assertEquals("https://api2.algorithmia.com/v1/connector/data/.my/foo_php", $client->getDataUrl($dir->getConnector(),$dir->getPath()));
     }
 
     public function testCreateAndDeleteDataDirectory() {
@@ -159,7 +159,7 @@ final class ClientDataDirectoryTest extends BaseTest
     public function testFilesReturnsDataFiles() {
         $client = $this->getClient();
 
-        $foo = $client->dir("data://.my/foo");
+        $foo = $client->dir("data://.my/foo_php");
 
         if($foo->exists()){
             $foo->delete(true);
@@ -167,7 +167,7 @@ final class ClientDataDirectoryTest extends BaseTest
         
         $foo->create();
         
-        $new_file = $client->file("data://.my/foo/Optimus_Prime.txt");
+        $new_file = $client->file("data://.my/foo_php/Optimus_Prime.txt");
         $new_file->put("Leader of the Autobots");
         $this->assertEquals(200, $new_file->getResponse()->getStatusCode());
         $this->assertInstanceOf(\Algorithmia\DataFile::class, $new_file);    
@@ -175,7 +175,7 @@ final class ClientDataDirectoryTest extends BaseTest
         foreach($foo->files() as $file){
 
             $this->assertInstanceOf(\Algorithmia\DataFile::class, $file);    
-            $this->assertEquals(".my/foo/Optimus_Prime.txt",$file->getPath()); //a dataobject property getter method
+            $this->assertEquals(".my/foo_php/Optimus_Prime.txt",$file->getPath()); //a dataobject property getter method
             $this->assertEquals("Optimus_Prime.txt", $file->getFilename()); //a datafile property getter
             $this->assertEquals("Optimus_Prime.txt", $file->getName()); //a datafile property getter - can use either
 
@@ -191,7 +191,7 @@ final class ClientDataDirectoryTest extends BaseTest
         $client = $this->getClient();
 
         //create a foo
-        $foo = $client->dir("data://.my/foo");
+        $foo = $client->dir("data://.my/foo_php");
 
         if(!$foo->exists()){
             $foo->create();
@@ -207,14 +207,14 @@ final class ClientDataDirectoryTest extends BaseTest
             $this->assertInstanceOf(\Algorithmia\DataDirectory::class, $folder);    
 
             //looking for foo
-            if($folder->getName() == "foo")
+            if($folder->getName() == "foo_php")
             {
                 $foundfoo = $folder; //hooray!
             }
         }
 
         $this->assertTrue($foundfoo != false); 
-        $this->assertEquals($foundfoo->getPath(),".my/foo");
+        $this->assertEquals($foundfoo->getPath(),".my/foo_php");
 
         $foo->delete(true); 
     }

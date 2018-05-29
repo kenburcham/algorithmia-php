@@ -3,7 +3,7 @@ error_reporting(E_ALL); ini_set('display_errors', 1);
 
 include "../vendor/autoload.php";
 
-use Algorithmia;
+//use Algorithmia;
 $client = Algorithmia::client('API_KEY');
 
 $myUsername = "jpeck";
