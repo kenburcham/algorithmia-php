@@ -2,83 +2,88 @@
 
 namespace Algorithmia;
 
-class DataDirectory {
+class DataDirectory extends DataObject {
 
-    private $client;
+    private $folders = [];
+    private $files = [];
     
-    private $dataUrl;
-    private $connector;
-    private $path;
-    private $name; 
-
-    private $folders;
-    private $files;
-    private $marker;
-    private $acl;
-
-    private $response;
-
-
-    public function __construct(string $in_dataurl, Client $in_client = null){
-        $this->client = $in_client;
-        $this->dataUrl = rtrim($in_dataurl,"/");
-
-        preg_match('/(?P<connection>\w+):\/\/(?P<path>.*)/', $this->dataUrl, $url_parts);
-
-        $this->connector = $url_parts['connection'];
-        $this->path = $url_parts['path'];
-
-        preg_match('/(?P<name>[^\/]*)$/',$this->path, $name_parts);
-        $this->name = $name_parts['name'];
-
-        if(!DataConnectors::isValidConnector($this->connector)){
-            throw new AlgoException("connection type is invalid: "+ $this->connector);
-        }
-
-        //if(isset($this->client)){
-        //    $this->sync();
-        //}
-    }
-
-    
-
-    public function sync(){
-        if(is_null($this->client)){
-            throw new AlgoException("client must be set");
-        }
-
-        $response = $this->client->doDataGet($this->connector, $this->path);
-        if(property_exists($response, 'files')){
-            $this->files = $response->files;
-        }
-        if(property_exists($response, 'folders')){
-            $this->folders = $response->folders;
-        }
-
-        //var_dump($response);
-
-
-    }
-
-    public function create(string $in_name, $in_acl)
+    /**
+     * Call the Algorithmia API and populate ourselves.
+     */
+    public function sync($in_marker = null, $in_returnAcl = false)
     {
-        
+        $acl = ($in_returnAcl) ? "acl=true" : "acl=false"; 
+        $path = (is_null($in_marker)) ? $this->path . '?' . $acl : $this->path . '?marker=' . $in_marker . '&' . $acl;
+
+        //echo "calling: " . $path;
+
+        $response = $this->client->doDataGet($this->connector, $path);
+
+        $str_result = $response->getBody()->getContents();
+        $obj_result = json_decode($str_result);
+
+        //echo print_r($obj_result, true);
+
+        if(property_exists($obj_result, 'error')){
+            throw new AlgoException($obj_result->error->message);
+        }
+
+        if(property_exists($obj_result, 'files')){
+            $this->files = array_merge($this->files, $this->asDataFiles($obj_result->files));
+        }
+
+        if(property_exists($obj_result, 'folders')){
+            $this->folders = array_merge($this->folders, $this->asDataDirectories($obj_result->folders));
+        }
+
+        if(property_exists($obj_result, 'marker')){
+            $this->sync($obj_result->marker); //recursively call until we have all of the files
+        }
+
+        if(property_exists($obj_result, 'acl')){
+            $this->acl = $obj_result->acl;
+        }
+
+        $this->response = $response;
+       
     }
 
-    public function getConnector(){
-        return $this->connector;
+    /** 
+    * Create a directory 
+    * @param 
+    */
+    public function create($in_acl = ACL::DEFAULT)
+    {
+        $input = ["name" => $this->name, "acl" => ACL::getACLJson($in_acl)];
+        $this->response = $this->client->doDataPost($this->connector, $this->parent, $input);
+        return $this;
     }
 
-    public function getPath(){
-        return $this->path;
+    public function delete($in_force = false)
+    {
+        $path_force = ($in_force) ? $this->path . "?force=true" : $this->path;
+        $this->response = $this->client->doDataDelete($this->connector, $path_force);
+        return $this;
     }
 
-    public function getDataUrl(){
-        return $this->dataUrl;
+    public function containsFolder(string $in_name){
+
+        foreach($this->folders() as $folder){
+            if($folder->name == $in_name )
+                return true;
+        }
+
+        return false;
     }
 
-    public function getName(){
-        return $this->name;
+    public function containsFile(string $in_name){
+
+        foreach($this->files() as $file){
+            if($file->name == $in_name )
+                return true;
+        }
+
+        return false;
     }
 
     public function folders(){
@@ -91,12 +96,43 @@ class DataDirectory {
         return $this->files;
     }
 
-    public function marker(){
-        return $this->marker();
+    /**
+     * Gets a reference to a directory's child DataFile
+     * @param $in_name can be full path "data://.my/somefolder/myfile.txt" or "myfile.txt" located in this directory
+     * @return DataFile file object
+     */
+    public function file($in_name){
+
+        if(strpos($in_name, '://')){
+            $file = new DataFile($in_name, $this->client); 
+        } else {
+            $file = new DataFile($this->getDataUrl().'/'.$in_name, $this->client);
+        }
+
+        return $file;
     }
 
-    public function acl(){
-        return $this->acl;
+    public function putFile(string $in_filepath){
+        preg_match('((?P<parent>.*)\/(?P<name>.*))',$in_filepath, $name_parts);
+
+        if(array_key_exists('name',$name_parts))
+            $filename = $name_parts['name'];
+        
+            if(!isset($filename))
+            throw new \Exception("filename is invalid.");
+
+        $file = new DataFile($this->getDataUrl().'/'.$filename, $this->client);
+        return $file->putFile($in_filepath);
+    }
+
+    public function list(){
+        $this->sync();
+        return array_merge($this->files, $this->folders);
+    }
+
+    public function getReadAcl(){
+        $this->sync(null, true);
+        return $this->acl->read[0];
     }
 
 }

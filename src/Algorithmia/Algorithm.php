@@ -40,6 +40,15 @@ class Algorithm {
     }
 
     /**
+     * Execute an API call for this Algorithm asynchronously. 
+     * @param \Guzzle\Promise\Promise the promise
+     */
+    public function pipeAsync($in_input)
+    {
+        return $this->client->doAlgoPipe($this->algoUrl, $in_input, true);
+    }
+
+    /**
      * Set options on the client such as timeout
      * @param array $in_options An array of options: ['timeout' => 120]
      * @return Algorithmia\Algorithm $this
