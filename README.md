@@ -126,7 +126,7 @@ and data from Dropbox or S3 accounts that you've connected to you Algorithmia ac
 Work with a directory by instantiating a `DataDirectory` object.
 
 ```PHP
-$foo = $client->dir("data://.my/foo_php");
+$foo = $client->dir("data://.my/foo");
 
 //now you can iterate files, folders or all items:
 
@@ -159,7 +159,7 @@ if($client->dir("data://.my/foo2")->exists()) { ... }
 Create directories by instantiating a `DataDirectory` object and calling `create()`.
 
 ```PHP
-$foo = $client->dir("data://.my/foo_php");
+$foo = $client->dir("data://.my/foo");
 if(!$foo->exists()) {
     $foo->create();
 }
@@ -183,7 +183,7 @@ Upload files by calling `put` on a `DataFile` object,
 or by calling `putFile` on a `DataDirectory` object.
 
 ```PHP
-$foo = $client->dir("data://.my/foo_php");
+$foo = $client->dir("data://.my/foo");
 
 //file.csv will be put into "foo" directory
 $foo->putFile("/path/to/my/file.csv"); 
@@ -209,7 +209,7 @@ Note: you can also instantiate a `DataFile` by either `$client->file('/path/to/f
 Download files by calling `getString`, `getBytes`, `getJson`, or `getFile` on a `DataFile` object:
 
 ```PHP
-$foo_dir = $client->dir("data://.my/foo_php");
+$foo_dir = $client->dir("data://.my/foo");
 $file_content_text = $foo_dir->file("sample.txt")->getString();  # String object
 $binary_content = $foo_dir->file("binary_file.jpg")->getBytes();  # Binary data
 $json_object = $foo_dir->file("myfile.json")->getJson(); #Json object
@@ -228,7 +228,7 @@ DataDirectories take an optional `force` parameter that indicates whether the di
 if it contains files or other directories.
 
 ```PHP
-$foo_dir = $client->dir("data://.my/foo_php");
+$foo_dir = $client->dir("data://.my/foo");
 $foo_dir->file("sample.txt")->delete(); 
 $foo_dir->delete(); //will fail if the collection isn't empty
 $foo_dir->delete(true); // true forces deleting the directory and its contents
