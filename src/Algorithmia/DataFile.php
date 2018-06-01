@@ -97,10 +97,15 @@ class DataFile extends DataObject {
     }
 
     public function putFile($in_filepath){
-        if(!file_exists($in_filepath))
-            throw new \Exception("file does not exist: ".$in_filepath);
+        $filepath = $in_filepath;
 
-        $bin_file = file_get_contents($in_filepath);
+        if(!file_exists($filepath)){
+            $filepath = getcwd().'/'.$in_filepath; //try the local directory, i.e. "./"
+            if(!file_exists($filepath))
+                throw new \Exception("file does not exist: ".$in_filepath." or " .$filepath);
+        }
+
+        $bin_file = file_get_contents($filepath);
 
         $this->response = $this->client->doDataPut($this->connector, $this->path, $bin_file);
         return $this;

@@ -105,7 +105,7 @@ class HttpClient {
         }
         catch(\Exception $e)
         {
-            throw new AlgoException($this->extractExceptionMessage($e));
+            throw new AlgoException($this->extractExceptionMessage($e)." for " .$in_url);
         }
 
     }

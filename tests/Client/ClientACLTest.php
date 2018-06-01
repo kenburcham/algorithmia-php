@@ -25,7 +25,12 @@ final class ClientACLTest extends BaseTest
 
     public function testDefaultDirectoryPermissions(){
         $client = $this->getClient();
-        $newdir = $client->dir("data://.my/fooNew2")->create(); 
+        $newdir = $client->dir("data://.my/fooNew2ACL");
+        
+        if($newdir->exists())
+            $newdir->delete(true); //because we need the permissions to be default!
+
+        $newdir->create(); 
         $this->assertTrue($newdir->exists());
 
         $this->assertEquals($newdir->getReadAcl(), \Algorithmia\ACL::DEFAULT);
@@ -35,7 +40,7 @@ final class ClientACLTest extends BaseTest
 
     public function testPublicDirectoryPermissions(){
         $client = $this->getClient();
-        $newdir = $client->dir("data://.my/fooNew2")->create(\Algorithmia\ACL::ANYONE); 
+        $newdir = $client->dir("data://.my/fooNew2ACL")->create(\Algorithmia\ACL::ANYONE); 
         $this->assertTrue($newdir->exists());
 
         $this->assertEquals($newdir->getReadAcl(), \Algorithmia\ACL::ANYONE);

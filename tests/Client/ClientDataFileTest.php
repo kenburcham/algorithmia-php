@@ -9,7 +9,7 @@ final class ClientDataFileTest extends BaseTest
     const FOOFILE = "data://.my/".TEST_DIR_NAME."/foofile.txt";
     const EXAMPLE_FILE = "test_example.txt"; //text file present in the test directory
     const EXAMPLE_BIN_FILE = "opencv_example.png"; //binary file in the test directory
-    
+
     public function testConstructor(){
         $file = new Algorithmia\DataFile(self::FOOFILE);
 
@@ -127,6 +127,26 @@ final class ClientDataFileTest extends BaseTest
         $client->file(self::FOODIR.'/'.self::EXAMPLE_FILE)->delete();
     }
 
+    public function testPutNonExistentFile(){
+        $client = $this->getClient();
+        $foo_dir = $client->dir(self::FOODIR);
+        $this->expectException(\Exception::class);
+        $file = $foo_dir->putFile($this->testDir . '/NotHere.txt'); 
+    }
+
+    //our tests dir is our running dir - we should be able to put a file just by name: "opencv_example.png"
+    public function testPutBareNamedFile(){ 
+        $client = $this->getClient();
+        $foo_dir = $client->dir(self::FOODIR);
+        if(!$foo_dir->exists())
+            $foo_dir->create();
+        
+        $file = $foo_dir->putFile('README.md');  //exists in ./ if you run the tests from the root algorithmia dir
+        
+        $this->assertEquals(200, $file->response->getStatusCode());
+        $file->delete(true);
+    }
+
     //now this actually gets a file handle... a temp file will be created via stream
     public function testGetFileSystemFile(){
         $client = $this->getClient();
@@ -174,7 +194,6 @@ final class ClientDataFileTest extends BaseTest
         unlink($my_file_path);
 
     }
-
 
 
 }

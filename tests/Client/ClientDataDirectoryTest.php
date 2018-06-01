@@ -124,8 +124,8 @@ final class ClientDataDirectoryTest extends BaseTest
         $this->assertEquals(200, $file->response->getStatusCode());
 
         //delete will fail because folder has contents
-        //$this->expectException(\Algorithmia\AlgoException::class);
-        //$newdir->delete();
+        $this->expectException(\Algorithmia\AlgoException::class);
+        $newdir->delete();
 
         $this->assertTrue($newdir->exists());
 

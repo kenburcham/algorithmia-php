@@ -113,14 +113,20 @@ class DataDirectory extends DataObject {
     }
 
     public function putFile(string $in_filepath){
-        preg_match('((?P<parent>.*)\/(?P<name>.*))',$in_filepath, $name_parts);
+        if(strpos($in_filepath,'/')===false){
+            $filename = $in_filepath;
+        }
+        else
+        {
+            preg_match('((?P<parent>.*)\/(?P<name>.*))',$in_filepath, $name_parts);
 
-        if(array_key_exists('name',$name_parts))
-            $filename = $name_parts['name'];
+            if(array_key_exists('name',$name_parts))
+                $filename = $name_parts['name'];
+            
+                if(!isset($filename))
+                throw new \Exception("filename is invalid.");
+        }
         
-            if(!isset($filename))
-            throw new \Exception("filename is invalid.");
-
         $file = new DataFile($this->getDataUrl().'/'.$filename, $this->client);
         return $file->putFile($in_filepath);
     }
