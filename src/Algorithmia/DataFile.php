@@ -74,7 +74,12 @@ class DataFile extends DataObject {
 
     public function getJson(){
         if(!$this->result) $this->getDataFile();
-        return json_decode($this->result);
+        $json_result = json_decode($this->result);
+        
+        if(is_null($json_result))
+            throw new AlgoException("cannot convert result to json");
+        
+        return $json_result;
     }
 
     public function getString(){

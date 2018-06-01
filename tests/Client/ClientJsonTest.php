@@ -46,4 +46,18 @@ final class ClientJsonTest extends BaseTest
         $this->assertTrue($obj_result->marker);
 
     }
+
+    public function testJsonExceptionIfNotJson(){
+        $client = $this->getClient();
+        $foo_dir = $client->dir("data://.my/".TEST_DIR_NAME);
+        $foo_dir->create();
+
+        $the_file = $foo_dir->file("myfile.txt")->put("Leader of the Autobots");
+
+        $this->expectException(\Algorithmia\AlgoException::class);
+        $the_file->getJson();
+
+        $foo_dir->delete(true);
+
+    }
 }
