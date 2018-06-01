@@ -2,6 +2,8 @@
 
 use PHPUnit\Framework\TestCase;
 
+define("TEST_DIR_NAME", "test_php_".uniqid());
+
 class BaseTest extends TestCase
 {
     private $key;

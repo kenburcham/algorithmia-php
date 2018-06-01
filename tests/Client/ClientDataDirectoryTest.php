@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-define("TEST_DIR_NAME", "test_php_".uniqid());
+//define("TEST_DIR_NAME", "test_php_".uniqid());
 
 final class ClientDataDirectoryTest extends BaseTest
 {
