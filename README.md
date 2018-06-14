@@ -2,7 +2,7 @@ Algorithmia Common Library (PHP)
 ================================
 
 PHP client library for accessing the Algorithmia API
-For API documentation, see the [PHPDocs](https://algorithmia.com/docs/lang/PHP)
+For API documentation, see the [PHPDocs](https://algorithmia.com/developers/clients/php/)
 
 ## Installation
 Clone this repository and copy the Algorithmia folder into your project. You'll also need to run "composer update" to get the packages the client needs.
