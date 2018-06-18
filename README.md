@@ -11,7 +11,7 @@ Clone this repository and copy the Algorithmia folder into your project. You'll 
 First, create an Algorithmia client and authenticate with your API key. You must replace YOUR_API_KEY with your personal key:
 
 ```PHP
-include "vendor/autoload.php";
+require_once "vendor/autoload.php";
 
 $client = Algorithmia::client('YOUR_API_KEY');
 ```
