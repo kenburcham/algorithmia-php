@@ -136,7 +136,7 @@ foreach($foo->files() as $file){
 }
 
 // List directories in "foo"
-foreach ($foo->dirs() as $dir){
+foreach ($foo->folders() as $dir){
     echo $dir->getPath();
 }
 
