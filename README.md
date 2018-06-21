@@ -90,7 +90,7 @@ will be binary.
 
 ```PHP
 $input = new Algorithmia\ByteArray(file_get_contents("/path/to/myimage.png"));
-$result = $client->algo("opencv/SmartThumbnail/0.1")->pipe(input)->result;
+$result = $client->algo("opencv/SmartThumbnail/0.1")->pipe($input)->result;
 # -> [binary byte sequence]
 
 //if you want to write the result as a file:
