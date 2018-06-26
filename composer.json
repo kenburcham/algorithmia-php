@@ -3,6 +3,10 @@
     "description": "PHP Client for Algorithmia.com",
     "authors": [
         {
+            "name": "Jon Peck",
+            "email": "jpeck@algorithmia.com"
+        },
+        {
             "name": "Ken Burcham",
             "email": "kenburcham@gmail.com"
         }
