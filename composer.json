@@ -1,5 +1,5 @@
 {
-    "name": "root/algorithmia-php",
+    "name": "algorithmia/algorithmia",
     "description": "PHP Client for Algorithmia.com",
     "authors": [
         {
