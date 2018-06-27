@@ -5,7 +5,12 @@ PHP client library for accessing the Algorithmia API
 For API documentation, see the [PHPDocs](https://algorithmia.com/developers/clients/php/)
 
 ## Installation
-Clone this repository and copy the Algorithmia folder into your project. You'll also need to run "composer update" to get the packages the client needs.
+Using the package manager [Composer](https://packagist.org), run:
+```bash
+composer require algorithmia/algorithmia
+```
+
+For non-Composer system, use the [source](https://github.com/algorithmiaio/algorithmia-php)
 
 ## Authentication
 First, create an Algorithmia client and authenticate with your API key. You must replace YOUR_API_KEY with your personal key:
