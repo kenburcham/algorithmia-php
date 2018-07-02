@@ -2,7 +2,7 @@
     "name": "algorithmia/algorithmia",
     "description": "PHP Client for Algorithmia.com",
     "homepage": "https://algorithmia.com",
-    "license", "MIT",
+    "license": "MIT",
     "authors": [
         {
             "name": "Jon Peck",
