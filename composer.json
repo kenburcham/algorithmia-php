@@ -1,7 +1,13 @@
 {
-    "name": "root/algorithmia-php",
+    "name": "algorithmia/algorithmia",
     "description": "PHP Client for Algorithmia.com",
+    "homepage": "https://algorithmia.com",
+    "license": "MIT",
     "authors": [
+        {
+            "name": "Jon Peck",
+            "email": "jpeck@algorithmia.com"
+        },
         {
             "name": "Ken Burcham",
             "email": "kenburcham@gmail.com"

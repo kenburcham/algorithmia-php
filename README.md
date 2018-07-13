@@ -2,16 +2,21 @@ Algorithmia Common Library (PHP)
 ================================
 
 PHP client library for accessing the Algorithmia API
-For API documentation, see the [PHPDocs](https://algorithmia.com/docs/lang/PHP)
+For API documentation, see the [PHPDocs](https://algorithmia.com/developers/clients/php/)
 
 ## Installation
-Clone this repository and copy the Algorithmia folder into your project. You'll also need to run "composer update" to get the packages the client needs.
+Using the package manager [Composer](https://packagist.org), run:
+```bash
+composer require algorithmia/algorithmia
+```
+
+For non-Composer system, use the [source](https://github.com/algorithmiaio/algorithmia-php)
 
 ## Authentication
 First, create an Algorithmia client and authenticate with your API key. You must replace YOUR_API_KEY with your personal key:
 
 ```PHP
-include "vendor/autoload.php";
+require_once "vendor/autoload.php";
 
 $client = Algorithmia::client('YOUR_API_KEY');
 ```
@@ -90,7 +95,7 @@ will be binary.
 
 ```PHP
 $input = new Algorithmia\ByteArray(file_get_contents("/path/to/myimage.png"));
-$result = $client->algo("opencv/SmartThumbnail/0.1")->pipe(input)->result;
+$result = $client->algo("opencv/SmartThumbnail/0.1")->pipe($input)->result;
 # -> [binary byte sequence]
 
 //if you want to write the result as a file:
@@ -136,7 +141,7 @@ foreach($foo->files() as $file){
 }
 
 // List directories in "foo"
-foreach ($foo->dirs() as $dir){
+foreach ($foo->folders() as $dir){
     echo $dir->getPath();
 }
 
