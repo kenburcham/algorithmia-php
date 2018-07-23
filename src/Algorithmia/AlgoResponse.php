@@ -3,12 +3,15 @@
 namespace Algorithmia;
 
 class AlgoResponse {
+    /**
+     * @var \Psr\Http\Message\ResponseInterface
+     */
     private $httpResponse;
     public $result;
     public $metadata;
 
     /**
-     * @param $in_httpResponse HttpResponse object
+     * @param $in_httpResponse \Psr\Http\Message\ResponseInterface object
      * @param $in_result Object result object from algorithm call
      */
     public function __construct($in_httpResponse, $in_result) {
@@ -17,6 +20,9 @@ class AlgoResponse {
         $this->metadata = $in_result->metadata;
     }
 
+    /**
+     * @return \Psr\Http\Message\ResponseInterface
+     */
     public function getHttpResponse(){
         return $this->httpResponse;
     }

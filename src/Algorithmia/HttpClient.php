@@ -13,13 +13,13 @@ class HttpClient {
 
      /**
      * Guzzle http client configured with json headers
-     * @var GuzzleHttp\ClientInterface $json_http
+     * @var \GuzzleHttp\Client $json_http
      */
     private $json_http;
     
     /**
      * Guzzle http client configured with binary headers
-     * @var GuzzleHttp\ClientInterface $bin_http
+     * @var \GuzzleHttp\Client $bin_http
      */
     private $bin_http;
 
@@ -56,7 +56,7 @@ class HttpClient {
     /**
      * Set options for the Algo Client
      * @param array Array of parameters:  ['timeout' => 120, 'server' => 'https://api.algorithmia.com']
-     * @return Algorithmia\Client
+     * @return self
      */
     public function setOptions(array $in_options = array()) {
 
@@ -92,7 +92,7 @@ class HttpClient {
     /**
      * @param $in_url string of URL to call with PUT
      * @param $in_input mixed payload to deliver to api endpoint. Can be a string or an object.
-     * @return httpresponse Object
+     * @return \Psr\Http\Message\ResponseInterface Object
      */
     public function put(string $in_url, $in_input, string $in_content_type){
 
@@ -113,7 +113,7 @@ class HttpClient {
     /**
      * @param $in_url string of URL to call with POST
      * @param $in_input mixed payload to deliver to api endpoint. Can be a string or an object.
-     * @return httpresponse Object
+     * @return \Psr\Http\Message\ResponseInterface Object
      */
     public function post(string $in_url, $in_input, string $in_content_type, $in_async=false){
         $client = $this->getClientForType($in_content_type);
