@@ -18,7 +18,7 @@ class Client {
 
     /**
      * http client that manages our http calls
-     * @var Algorithmia\HttpClient $http
+     * @var HttpClient $http
      */
     private $http_client;
 
@@ -56,7 +56,7 @@ class Client {
     /**
      * Set options for the Algo Client
      * @param array Array of parameters:  ['timeout' => 120, 'server' => 'https://api.algorithmia.com']
-     * @return Algorithmia\Client
+     * @return HttpClient
      */
     public function setOptions(array $in_options = array()) {
         if(array_key_exists('server',$in_options))
@@ -74,7 +74,7 @@ class Client {
     /**
      * Get an Algorithmia\Algorithm that represents the algorithm to call.
      * @param string $in_algo The algorithm to call.
-     * @return Algorithmia\Algorithm
+     * @return Algorithm
      */
     public function algo(string $in_algo) {
         return new Algorithm($in_algo, $this);
@@ -83,7 +83,7 @@ class Client {
     /**
      * Get an Algorithmia\DataDirectory that represents a directory.
      * @param string $in_dataurl The data directory url, e.g.: data://.my/folder
-     * @return Algorithmia\DataDirectory
+     * @return DataDirectory
      */
     public function dir(string $in_dataurl) {
         return new DataDirectory($in_dataurl, $this);
@@ -92,7 +92,7 @@ class Client {
     /**
      * Get an Algorithmia\DataFile that represents a file.
      * @param string $in_dataurl The full path to the file, e.g.: data://.my/folder/file.txt
-     * @return Algorithmia\DataFile
+     * @return DataFile
      */
     public function file(string $in_datafile) {
         return new DataFile($in_datafile, $this);
@@ -144,7 +144,7 @@ class Client {
      * Do the synchronous POST call and return the result.
      * @param string $in_algo The algorithm to call.
      * @param mixed $in_input The input to send to the algorithm. Can be a string or an object.
-     * @return Algorithmia\AlgoResponse the AlgoResponse object for the result
+     * @return AlgoResponse|\GuzzleHttp\Promise\PromiseInterface the AlgoResponse object for the result
      */
     public function doAlgoPipe(string $in_algo, $in_input, $in_async = false) {
 
@@ -187,7 +187,7 @@ class Client {
     }
 
     //builds the algoresponse from the response object
-    public function buildAlgoResponse($response) {
+    public function buildAlgoResponse(\Psr\Http\Message\ResponseInterface $response) {
         $str_result = $response->getBody()->getContents();
 
         if($this->getOptions()['output'] == 'raw')
