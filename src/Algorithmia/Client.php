@@ -76,7 +76,7 @@ class Client {
      * @param string $in_algo The algorithm to call.
      * @return Algorithmia\Algorithm
      */
-    public function algo(string $in_algo) {
+    public function algo($in_algo) {
         return new Algorithm($in_algo, $this);
     }
 
@@ -85,7 +85,7 @@ class Client {
      * @param string $in_dataurl The data directory url, e.g.: data://.my/folder
      * @return Algorithmia\DataDirectory
      */
-    public function dir(string $in_dataurl) {
+    public function dir($in_dataurl) {
         return new DataDirectory($in_dataurl, $this);
     }
 
@@ -94,25 +94,25 @@ class Client {
      * @param string $in_dataurl The full path to the file, e.g.: data://.my/folder/file.txt
      * @return Algorithmia\DataFile
      */
-    public function file(string $in_datafile) {
+    public function file($in_datafile) {
         return new DataFile($in_datafile, $this);
     }
 
-    public function doDataPut(string $in_connector, string $in_path, $in_input){
+    public function doDataPut($in_connector, $in_path, $in_input){
         $data_url = $this->getDataUrl($in_connector, $in_path);
         $response = $this->http_client->put($data_url, $in_input, HttpClient::CONTENT_TYPE_OCTET_STREAM);
 
         return $response;
     }
 
-    public function doFileGet(string $in_connector, string $in_path){
+    public function doFileGet($in_connector, $in_path){
         $data_url = $this->getDataUrl($in_connector, $in_path);
         $response = $this->http_client->get($data_url, HttpClient::CONTENT_TYPE_OCTET_STREAM);
 
         return $response;  
     }
 
-    public function doDataGet(string $in_connector, string $in_path){
+    public function doDataGet($in_connector, $in_path){
 
         $data_url = $this->getDataUrl($in_connector, $in_path);
         $response = $this->http_client->get($data_url, HttpClient::CONTENT_TYPE_JSON);
@@ -121,7 +121,7 @@ class Client {
 
     }
 
-    public function doDataPost(string $in_connector, string $in_path, $in_input){
+    public function doDataPost($in_connector, $in_path, $in_input){
         $data_url = $this->getDataUrl($in_connector, $in_path);
         $content_type = HttpClient::CONTENT_TYPE_JSON;
 
@@ -131,7 +131,7 @@ class Client {
 
     }
 
-    public function doDataDelete(string $in_connector, string $in_path){
+    public function doDataDelete($in_connector, $in_path){
         $data_url = $this->getDataUrl($in_connector, $in_path);
         $content_type = HttpClient::CONTENT_TYPE_JSON;
         
@@ -146,7 +146,7 @@ class Client {
      * @param mixed $in_input The input to send to the algorithm. Can be a string or an object.
      * @return Algorithmia\AlgoResponse the AlgoResponse object for the result
      */
-    public function doAlgoPipe(string $in_algo, $in_input, $in_async = false) {
+    public function doAlgoPipe($in_algo, $in_input, $in_async = false) {
 
         $algo_url = $this->getAlgoUrl($in_algo);
 
@@ -227,7 +227,7 @@ class Client {
      * Builds the data url from the server + "/v1/" + connector e.g.: "https://api.algorithmia.com/v1/data/"
      * @return string data api url
      */
-    public function getDataUrl(string $in_connector, string $in_path){
+    public function getDataUrl($in_connector, $in_path){
         return $this->api_address . self::API_VERSION . 'connector/' . $in_connector . "/".$in_path;
     }
 
@@ -235,7 +235,7 @@ class Client {
         return $this->api_address . self::API_VERSION . self::ALGO_SUFFIX . $in_algo;
     }
 
-    public function getDomainFromURL(string $in_url){
+    public function getDomainFromURL($in_url){
         preg_match('/^(?P<domain>https?:\/\/[^\/]*)/',$in_url,$url_parts);
         return $url_parts['domain'];
     }

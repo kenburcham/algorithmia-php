@@ -52,7 +52,7 @@ class DataDirectory extends DataObject {
     * Create a directory 
     * @param 
     */
-    public function create($in_acl = ACL::DEFAULT)
+    public function create($in_acl = ACL::DEFAULT_PERMISSION)
     {
         $input = ["name" => $this->name, "acl" => ACL::getACLJson($in_acl)];
         $this->response = $this->client->doDataPost($this->connector, $this->parent, $input);
@@ -66,7 +66,7 @@ class DataDirectory extends DataObject {
         return $this;
     }
 
-    public function containsFolder(string $in_name){
+    public function containsFolder($in_name){
 
         foreach($this->folders() as $folder){
             if($folder->name == $in_name )
@@ -76,7 +76,7 @@ class DataDirectory extends DataObject {
         return false;
     }
 
-    public function containsFile(string $in_name){
+    public function containsFile($in_name){
 
         foreach($this->files() as $file){
             if($file->name == $in_name )
@@ -112,7 +112,7 @@ class DataDirectory extends DataObject {
         return $file;
     }
 
-    public function putFile(string $in_filepath){
+    public function putFile($in_filepath){
         if(strpos($in_filepath,'/')===false){
             $filename = $in_filepath;
         }
@@ -131,7 +131,8 @@ class DataDirectory extends DataObject {
         return $file->putFile($in_filepath);
     }
 
-    public function list(){
+    //note: "list" is a reserved word for PHP 5.6
+    public function getList(){
         $this->sync();
         return array_merge($this->files, $this->folders);
     }

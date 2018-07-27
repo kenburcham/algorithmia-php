@@ -10,7 +10,7 @@ class DataConnectors {
         "dropbox",
     );
     
-    public static function isValidConnector(string $in_connector){
+    public static function isValidConnector($in_connector){
         return in_array($in_connector, self::$connectors);
     }
 }
