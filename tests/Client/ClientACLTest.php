@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 final class ClientACLTest extends BaseTest
 {
     public function testWorldReadable()
@@ -33,7 +31,7 @@ final class ClientACLTest extends BaseTest
         $newdir->create(); 
         $this->assertTrue($newdir->exists());
 
-        $this->assertEquals($newdir->getReadAcl(), \Algorithmia\ACL::DEFAULT);
+        $this->assertEquals($newdir->getReadAcl(), \Algorithmia\ACL::DEFAULT_PERMISSION);
 
         $newdir->delete();
     }

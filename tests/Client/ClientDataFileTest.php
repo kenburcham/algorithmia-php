@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 final class ClientDataFileTest extends BaseTest
 {
     const HOME_DIR = "data://.my";

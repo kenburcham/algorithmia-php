@@ -18,7 +18,7 @@ class DataFile extends DataObject {
      *  if you don't provide this argument, we will just create a temporary file and give you the handle to that.
      * @returns file system handle
      */
-    public function getFile(string $in_targetfilepath = null){
+    public function getFile($in_targetfilepath = null){
 
         $target_file = $in_targetfilepath;
 

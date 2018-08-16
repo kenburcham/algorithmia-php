@@ -69,7 +69,7 @@ class HttpClient {
         return $this;
     }
 
-    public function get(string $in_url, string $in_content_type){
+    public function get($in_url, $in_content_type){
         $client = $this->getClientForType($in_content_type);
        
         try
@@ -94,7 +94,7 @@ class HttpClient {
      * @param $in_input mixed payload to deliver to api endpoint. Can be a string or an object.
      * @return httpresponse Object
      */
-    public function put(string $in_url, $in_input, string $in_content_type){
+    public function put($in_url, $in_input, $in_content_type){
 
         $client = $this->getClientForType($in_content_type);
         $body_name = $this->getBodyNameForType($in_content_type);
@@ -115,7 +115,7 @@ class HttpClient {
      * @param $in_input mixed payload to deliver to api endpoint. Can be a string or an object.
      * @return httpresponse Object
      */
-    public function post(string $in_url, $in_input, string $in_content_type, $in_async=false){
+    public function post($in_url, $in_input, $in_content_type, $in_async=false){
         $client = $this->getClientForType($in_content_type);
         $body_name = $this->getBodyNameForType($in_content_type);
         
@@ -134,7 +134,7 @@ class HttpClient {
         }
     }
 
-    public function delete(string $in_url, string $in_content_type) {
+    public function delete($in_url, $in_content_type) {
         $client = $this->getClientForType($in_content_type);
 
         try{
@@ -146,7 +146,7 @@ class HttpClient {
         }
     }
 
-    public function getClientForType(string $in_content_type) {
+    public function getClientForType($in_content_type) {
         if($in_content_type == self::CONTENT_TYPE_JSON)
         {
             $client = $this->getJsonHttpClient();
@@ -157,7 +157,7 @@ class HttpClient {
         return $client;
     }
 
-    public function getBodyNameForType(string $in_content_type) {
+    public function getBodyNameForType($in_content_type) {
         if($in_content_type == self::CONTENT_TYPE_JSON)
         {
             $body_name = 'json';

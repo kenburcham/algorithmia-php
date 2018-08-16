@@ -24,7 +24,7 @@ class Algorithm {
      * @param string $in_algo
      * @param Algorithmia\Client $client
      */
-    public function __construct(string $in_algo, Client $in_client = null)
+    public function __construct( $in_algo, Client $in_client = null)
     {
         $this->client = $in_client;
         $this->algoUrl = $in_algo;
