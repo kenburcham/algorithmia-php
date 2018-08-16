@@ -9,7 +9,7 @@ class Algorithm {
 
     /**
      * Client we use to make API calls to the algorithm.
-     * @var Algorithmia/Client $client
+     * @var Client $client
      */
     private $client;
 
@@ -22,7 +22,7 @@ class Algorithm {
     /**
      * Construct the Algorithmia/Algorithm
      * @param string $in_algo
-     * @param Algorithmia\Client $client
+     * @param Client $client
      */
     public function __construct( $in_algo, Client $in_client = null)
     {
@@ -33,6 +33,7 @@ class Algorithm {
     /**
      * Execute an API call for this Algorithm
      * @param mixed $in_input The input to send to the algorithm.
+     * @return AlgoResponse the AlgoResponse object for the result
      */
     public function pipe($in_input) 
     {
@@ -41,7 +42,8 @@ class Algorithm {
 
     /**
      * Execute an API call for this Algorithm asynchronously. 
-     * @param \Guzzle\Promise\Promise the promise
+     * @param mixed $in_input The input to send to the algorithm.
+     * @return \GuzzleHttp\Promise\PromiseInterface Promise which return AlgoResponse when resolved
      */
     public function pipeAsync($in_input)
     {
@@ -51,7 +53,7 @@ class Algorithm {
     /**
      * Set options on the client such as timeout
      * @param array $in_options An array of options: ['timeout' => 120]
-     * @return Algorithmia\Algorithm $this
+     * @return self $this
      */
     public function setOptions(array $in_options = array()) 
     {

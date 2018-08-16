@@ -20,8 +20,7 @@ class DataObject {
     /**
      * Constructs a DataObject ready for fetching or creating
      * @param string $in_dataurl The URL for the DataObject to represent
-     * @param Algorithmia\Client $client The client object to use if you want to actually connect.
-     * @return Algorithmia\DataObject 
+     * @param Client $client The client object to use if you want to actually connect.
      */
     public function __construct($in_dataurl, Client $in_client = null){
         $this->client = $in_client;
